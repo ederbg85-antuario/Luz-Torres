@@ -1,0 +1,114 @@
+# Luz Torres · Sitio web + Panel de gestión
+
+Sitio web inmobiliario y panel de administración para **Luz Torres**, asesora
+inmobiliaria. Construido con Next.js, React y Supabase, siguiendo el brandbook
+de la marca.
+
+## Qué incluye
+
+**Sitio público** (sin inicio de sesión)
+
+- Portada con buscador y filtros tipo Inmuebles24 (comprar / rentar / vender).
+- Catálogo de propiedades con filtros por operación, estado, ciudad/alcaldía,
+  tipo, precio, recámaras y baños.
+- Ficha de propiedad con galería, características y formulario de contacto.
+- Página "Sobre Luz" y página de contacto.
+- Estructura preparada para SEO (metadatos, sitemap, robots, datos
+  estructurados, keywords).
+
+**Panel de administración** (`/admin`, acceso solo por invitación)
+
+- Dashboard con métricas y pipeline.
+- Gestión de propiedades (alta, edición, fotos a Supabase Storage).
+- CRM de contactos con etapas de pipeline.
+- Agenda con calendario de citas.
+- Tablero de tareas tipo Trello (arrastrar y soltar).
+- Panel de marketing (estructura lista para conectar Instagram, Facebook,
+  Meta Ads, Google Analytics, Search Console y Google Ads).
+- Gestión de equipo por invitación.
+
+## Stack
+
+- **Next.js 15** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS** para el diseño (tokens del brandbook)
+- **Supabase** — base de datos, autenticación y almacenamiento
+
+## Puesta en marcha
+
+### 1. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 2. Variables de entorno
+
+Copia `.env.example` a `.env.local` y completa las claves de Supabase
+(Project Settings → API):
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://acrzgrbovizhqcnpmpdn.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+NEXT_PUBLIC_SITE_URL=https://luztorres.com
+```
+
+### 3. Base de datos
+
+En el **SQL Editor** de Supabase, ejecuta en orden:
+
+1. `supabase/migrations/0001_schema.sql` — tablas, seguridad (RLS) y storage.
+2. `supabase/migrations/0002_seed.sql` — datos de ejemplo.
+
+### 4. Usuario administrador
+
+Con las claves ya configuradas en `.env.local`:
+
+```bash
+npm run seed:admin
+```
+
+Crea el usuario administrador (credenciales por defecto):
+
+- **Correo:** `admin@luztorres.com`
+- **Contraseña:** `LuzTorres2026!`
+
+### 5. Ejecutar en local
+
+```bash
+npm run dev
+```
+
+- Sitio público: `http://localhost:3000`
+- Panel de administración: `http://localhost:3000/admin`
+
+## Despliegue en Vercel
+
+1. Importa el repositorio en Vercel.
+2. Agrega las variables de entorno (las mismas de `.env.local`).
+3. Despliega — Vercel detecta Next.js automáticamente.
+
+## Estructura
+
+```
+src/
+  app/
+    (site)/        Sitio público
+    admin/         Panel de administración
+  components/
+    site/          Componentes del sitio
+    admin/         Componentes del panel
+    ui/            Componentes compartidos
+  lib/
+    actions/       Server Actions
+    supabase/      Clientes de Supabase
+supabase/migrations/  Esquema SQL y datos de ejemplo
+scripts/           Script para crear el usuario admin
+```
+
+## Notas
+
+- El registro público está deshabilitado: los usuarios del panel solo se crean
+  por invitación desde **Equipo**.
+- Las propiedades sin foto usan un diseño de marca como portada.
+- Los copys son provisionales, pensados para SEO; se pueden ajustar después.
