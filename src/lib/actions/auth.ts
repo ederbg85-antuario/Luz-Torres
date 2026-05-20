@@ -20,7 +20,7 @@ export async function signIn(
   if (!isSupabaseConfigured()) {
     return {
       error:
-        "Supabase aún no está conectado. Configura las API keys en .env.local.",
+        "Supabase aún no está conectado. Falta configurar las variables de entorno del proyecto (en Vercel o en .env.local).",
     };
   }
 
