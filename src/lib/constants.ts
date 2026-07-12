@@ -30,6 +30,13 @@ export function whatsappLink(message?: string) {
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
+/**
+ * Google Tag Manager. Al crear el contenedor en tagmanager.google.com,
+ * pega aquí el ID (formato "GTM-XXXXXXX") y vuelve a desplegar: el
+ * script se inyecta solo. Desde GTM se conectan Analytics 4, Ads, etc.
+ */
+export const GTM_ID = "";
+
 // ─── Operación ──────────────────────────────────────────────────
 export const OPERATION_LABELS: Record<Operation, string> = {
   venta: "Venta",

@@ -1,10 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config";
 
 /** Indica si las credenciales de Supabase están configuradas. */
 export function isSupabaseConfigured() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  return Boolean(url && key && !key.includes("PEGA_AQUI"));
+  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 }
 
 /**
@@ -13,9 +12,7 @@ export function isSupabaseConfigured() {
  * las páginas públicas y generar el sitemap sin contexto de petición.
  */
 export function createSupabasePublicClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key",
-    { auth: { persistSession: false } }
-  );
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
 }

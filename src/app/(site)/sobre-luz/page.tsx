@@ -67,7 +67,7 @@ export default function SobreLuzPage() {
           <div>
             <p className="eyebrow">Sobre Luz</p>
             <h1 className="mt-3 text-display">
-              Soy Luz Torres. <span className="text-vivo">Esta es mi marca.</span>
+              Soy Luz Torres. <span className="text-nogal">Esta es mi marca.</span>
             </h1>
             <p className="mt-6 text-[15px] leading-relaxed text-humo">
               Trabajo como asesora inmobiliaria. Mi trabajo consiste en
@@ -113,7 +113,7 @@ export default function SobreLuzPage() {
       {/* Frase */}
       <section className="lt-container mt-20">
         <div className="rounded-2xl bg-petroleo px-8 py-14 text-center sm:px-16">
-          <p className="eyebrow text-bruma">Frase de marca</p>
+          <p className="eyebrow text-almendra-claro">Frase de marca</p>
           <p className="mx-auto mt-4 max-w-3xl font-serif text-2xl italic text-hueso sm:text-3xl">
             “Una decisión así no debería sentirse complicada. Mi trabajo es que
             no lo sea.”
@@ -126,7 +126,7 @@ export default function SobreLuzPage() {
         <div className="max-w-2xl">
           <p className="eyebrow">Cómo trabajo</p>
           <h2 className="mt-3 text-hero">
-            Seis criterios que <span className="text-vivo">no negocio.</span>
+            Seis criterios que <span className="text-nogal">no negocio.</span>
           </h2>
           <p className="mt-4 text-[15px] text-humo">
             Estos son los criterios que aplico en cada operación. Si una
@@ -136,7 +136,7 @@ export default function SobreLuzPage() {
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {VALORES.map((v) => (
             <div key={v.n} className="rounded-xl bg-papel p-6 shadow-card">
-              <span className="font-mono text-sm font-semibold text-vivo">
+              <span className="font-mono text-sm font-semibold text-nogal">
                 {v.n}
               </span>
               <h3 className="mt-2 text-lg font-semibold text-carbon">

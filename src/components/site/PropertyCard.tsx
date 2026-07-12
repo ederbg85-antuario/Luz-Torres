@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Maximize, BedDouble, Bath, Car } from "lucide-react";
+import { Maximize, BedDouble, Bath, Car, ArrowUpRight } from "lucide-react";
 import type { Property } from "@/lib/types";
 import { PROPERTY_TYPE_LABELS, statusBadge } from "@/lib/constants";
 import { cn, formatArea, formatPrice } from "@/lib/format";
@@ -14,7 +14,7 @@ function Spec({
 }) {
   return (
     <span className="flex items-center gap-1.5">
-      <Icon className="h-4 w-4 text-bruma" strokeWidth={1.75} />
+      <Icon className="h-4 w-4 text-almendra" strokeWidth={1.75} />
       {value}
     </span>
   );
@@ -33,10 +33,10 @@ export function PropertyCard({
   return (
     <Link
       href={`/propiedades/${property.slug}`}
-      className="group block overflow-hidden rounded-xl bg-papel shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated"
+      className="group relative block h-full overflow-hidden rounded-xl bg-papel shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-elevated"
     >
       <div className="relative aspect-[16/10] overflow-hidden">
-        <div className="h-full w-full transition-transform duration-500 group-hover:scale-105">
+        <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.06]">
           <PropertyImage
             src={property.cover_image}
             type={property.property_type}
@@ -45,7 +45,12 @@ export function PropertyCard({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
-        <span className="absolute left-3 top-3 rounded-full bg-papel/95 px-3 py-1 text-[11px] font-semibold text-petroleo shadow-soft">
+        {/* Velo inferior para legibilidad de los badges */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-cacao-oscuro/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        />
+        <span className="absolute left-3 top-3 rounded-full bg-papel/95 px-3 py-1 text-[11px] font-semibold text-petroleo shadow-soft backdrop-blur-sm">
           {statusBadge(property.operation, property.status)}
         </span>
         {property.featured && !sold && (
@@ -53,10 +58,14 @@ export function PropertyCard({
             Destacada
           </span>
         )}
+        {/* Indicador de acción al pasar el cursor */}
+        <span className="absolute bottom-3 right-3 grid h-9 w-9 translate-y-2 place-items-center rounded-full bg-papel/95 text-petroleo opacity-0 shadow-card backdrop-blur-sm transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <ArrowUpRight className="h-4 w-4" />
+        </span>
       </div>
 
       <div className="p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-eyebrow text-vivo">
+        <p className="text-[11px] font-semibold uppercase tracking-eyebrow text-almendra">
           {PROPERTY_TYPE_LABELS[property.property_type]}
         </p>
         <p

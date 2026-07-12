@@ -85,8 +85,16 @@ npm run dev
 ## Despliegue en Vercel
 
 1. Importa el repositorio en Vercel.
-2. Agrega las variables de entorno (las mismas de `.env.local`).
-3. Despliega — Vercel detecta Next.js automáticamente.
+2. Despliega — **no se necesitan variables de entorno**: la configuración
+   pública de Supabase vive en `src/lib/supabase/config.ts` y las
+   operaciones privilegiadas (invitar al equipo) corren en la Edge
+   Function `invite-member` dentro de Supabase.
+
+### Analytics / Tag Manager
+
+Cuando tengas el contenedor de Google Tag Manager, pega su ID en
+`GTM_ID` (`src/lib/constants.ts`) y vuelve a desplegar. Desde GTM
+puedes conectar Google Analytics 4, Google Ads, Meta Pixel, etc.
 
 ## Estructura
 

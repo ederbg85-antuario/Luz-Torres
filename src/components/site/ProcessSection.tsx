@@ -1,4 +1,5 @@
 import { SectionHeading } from "./SectionHeading";
+import { Reveal } from "./Reveal";
 
 const STEPS = [
   {
@@ -26,29 +27,42 @@ const STEPS = [
 export function ProcessSection() {
   return (
     <section className="lt-container mt-24">
-      <SectionHeading
-        eyebrow="Cómo trabajo"
-        title={
-          <>
-            Acompaño cada operación{" "}
-            <span className="text-vivo">de principio a fin.</span>
-          </>
-        }
-        intro="Sin cajas negras: los honorarios, los plazos y los riesgos están sobre la mesa desde el primer mensaje."
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="Cómo trabajo"
+          title={
+            <>
+              Acompaño cada operación{" "}
+              <span className="text-nogal">de principio a fin.</span>
+            </>
+          }
+          intro="Sin cajas negras: los honorarios, los plazos y los riesgos están sobre la mesa desde el primer mensaje."
+        />
+      </Reveal>
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((s) => (
-          <div key={s.n} className="rounded-xl bg-papel p-6 shadow-card">
-            <span className="font-mono text-sm font-semibold text-vivo">
-              {s.n}
-            </span>
-            <h3 className="mt-3 text-lg font-semibold text-carbon">
-              {s.title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-humo">{s.text}</p>
-          </div>
-        ))}
+      <div className="relative mt-12">
+        {/* Línea que conecta los pasos (escritorio) */}
+        <div
+          aria-hidden
+          className="absolute left-6 right-6 top-6 hidden h-px bg-gradient-to-r from-almendra/60 via-almendra/30 to-almendra/60 lg:block"
+        />
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+          {STEPS.map((s, i) => (
+            <Reveal key={s.n} delay={i * 110}>
+              <div className="relative">
+                <span className="relative z-10 grid h-12 w-12 place-items-center rounded-full border-2 border-almendra bg-hueso font-mono text-sm font-semibold text-nogal">
+                  {s.n}
+                </span>
+                <h3 className="mt-4 text-lg font-semibold text-carbon">
+                  {s.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-humo">
+                  {s.text}
+                </p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );

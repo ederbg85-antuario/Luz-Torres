@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { SITE, whatsappLink } from "@/lib/constants";
 import { cn } from "@/lib/format";
+import { WhatsAppIcon } from "./WhatsAppFab";
 
 const NAV = [
   { href: "/", label: "Inicio" },
@@ -35,10 +36,10 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
                 isActive(item.href)
                   ? "bg-papel text-petroleo shadow-soft"
-                  : "text-humo hover:text-carbon"
+                  : "text-humo hover:bg-papel/60 hover:text-carbon"
               )}
             >
               {item.label}
@@ -51,9 +52,9 @@ export function SiteHeader() {
             href={whatsappLink("Hola Luz, vi tu sitio y me gustaría más información.")}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-accent hidden px-4 py-2.5 sm:inline-flex"
+            className="btn-whatsapp hidden px-4 py-2.5 sm:inline-flex"
           >
-            <MessageCircle className="h-4 w-4" />
+            <WhatsAppIcon className="h-4 w-4" />
             WhatsApp
           </a>
           <button
@@ -89,9 +90,9 @@ export function SiteHeader() {
               href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-accent mt-2"
+              className="btn-whatsapp mt-2"
             >
-              <MessageCircle className="h-4 w-4" />
+              <WhatsAppIcon className="h-4 w-4" />
               Escribir por WhatsApp · {SITE.phoneDisplay}
             </a>
           </nav>

@@ -21,7 +21,7 @@
   }
 
   ::selection {
-    @apply bg-vivo/20 text-sombra;
+    @apply bg-almendra/25 text-cacao-oscuro;
   }
 
   h1,
@@ -39,9 +39,9 @@
     @apply mx-auto w-full max-w-container px-5 sm:px-6 lg:px-8;
   }
 
-  /* Etiqueta superior — eyebrow del brandbook */
+  /* Etiqueta superior — eyebrow del brandbook, en café como acento fino */
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-eyebrow text-vivo;
+    @apply text-[11px] font-semibold uppercase tracking-eyebrow text-nogal;
   }
 
   /* Superficie blanca con esquinas redondeadas y sombra suave */
@@ -54,27 +54,38 @@
     @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all duration-200 disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-petroleo px-5 py-3 text-hueso hover:bg-sombra;
+    @apply btn bg-petroleo px-5 py-3 text-hueso hover:-translate-y-0.5 hover:bg-sombra hover:shadow-card;
   }
   .btn-accent {
-    @apply btn bg-vivo px-5 py-3 text-papel hover:bg-petroleo;
+    @apply btn bg-vivo px-5 py-3 text-papel hover:-translate-y-0.5 hover:bg-petroleo hover:shadow-card;
   }
   .btn-ghost {
-    @apply btn border border-lino bg-papel px-5 py-3 text-carbon hover:border-bruma hover:bg-nieve;
+    @apply btn border border-arena/70 bg-papel px-5 py-3 text-carbon hover:-translate-y-0.5 hover:border-almendra hover:bg-nieve hover:shadow-soft;
+  }
+  .btn-whatsapp {
+    @apply btn bg-whatsapp px-5 py-3 text-white hover:-translate-y-0.5 hover:bg-whatsapp-oscuro hover:shadow-card;
   }
 
   /* Campos de formulario */
   .field {
-    @apply w-full rounded-md border border-lino bg-papel px-3.5 py-2.5 text-sm text-carbon outline-none transition-colors placeholder:text-humo focus:border-vivo focus:ring-2 focus:ring-vivo/15;
+    @apply w-full rounded-md border border-lino bg-papel px-3.5 py-2.5 text-sm text-carbon outline-none transition-colors placeholder:text-humo focus:border-almendra focus:ring-2 focus:ring-almendra/20;
   }
   .label {
     @apply mb-1.5 block text-[13px] font-medium text-carbon;
+  }
+
+  /* Chip seleccionable (filtros) */
+  .chip {
+    @apply inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border border-lino bg-papel px-3.5 py-2 text-[13px] font-medium text-humo transition-all duration-150 hover:border-almendra hover:text-carbon;
+  }
+  .chip-active {
+    @apply border-petroleo bg-petroleo text-hueso hover:border-petroleo hover:text-hueso;
   }
 }
 
 @layer utilities {
   .text-display {
-    @apply text-4xl font-light tracking-tight sm:text-5xl lg:text-6xl;
+    @apply text-4xl font-light tracking-tight sm:text-5xl lg:text-[64px] lg:leading-[1.04];
   }
   .text-hero {
     @apply text-3xl font-light tracking-tight sm:text-4xl lg:text-5xl;
@@ -85,5 +96,54 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Retrasos de animación para secuencias escalonadas */
+  .delay-75 {
+    animation-delay: 75ms;
+  }
+  .delay-150 {
+    animation-delay: 150ms;
+  }
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  .delay-450 {
+    animation-delay: 450ms;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   Revelado al hacer scroll — activado por el componente <Reveal>
+   (IntersectionObserver agrega .is-visible al entrar al viewport)
+   ──────────────────────────────────────────────────────────── */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

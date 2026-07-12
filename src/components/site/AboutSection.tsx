@@ -2,26 +2,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SITE } from "@/lib/constants";
+import { Reveal } from "./Reveal";
 
 export function AboutSection() {
   return (
     <section className="lt-container mt-24">
       <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
-        <div className="relative order-2 aspect-[4/5] overflow-hidden rounded-2xl bg-lino shadow-elevated lg:order-1">
-          <Image
-            src="/luz-outdoor.jpg"
-            alt="Luz Torres, asesora inmobiliaria"
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
+        <Reveal className="relative order-2 lg:order-1">
+          {/* Marco café desplazado */}
+          <div
+            aria-hidden
+            className="absolute -bottom-4 -left-4 hidden h-full w-full rounded-2xl bg-almendra/20 sm:block"
           />
-        </div>
+          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-lino shadow-elevated">
+            <Image
+              src="/luz-outdoor.jpg"
+              alt="Luz Torres, asesora inmobiliaria"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
+        </Reveal>
 
-        <div className="order-1 lg:order-2">
+        <Reveal delay={120} className="order-1 lg:order-2">
           <p className="eyebrow">Sobre Luz</p>
           <h2 className="mt-3 text-hero">
             Soy Luz Torres. Esta es mi{" "}
-            <span className="text-vivo">forma de trabajar.</span>
+            <span className="text-nogal">forma de trabajar.</span>
           </h2>
           <p className="mt-5 text-[15px] leading-relaxed text-humo">
             Acompaño a familias e inversionistas a comprar, vender o rentar una
@@ -39,7 +47,7 @@ export function AboutSection() {
             no lo sea.”
           </blockquote>
 
-          <div className="mt-7 flex items-center gap-3 rounded-xl bg-papel p-4 shadow-soft">
+          <div className="mt-7 flex items-center gap-3 rounded-xl border border-lino bg-papel p-4 shadow-soft">
             <Image
               src="/imagen-inmobiliaria.jpg"
               alt={SITE.partner}
@@ -48,7 +56,7 @@ export function AboutSection() {
               className="rounded-md"
             />
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-eyebrow text-humo">
+              <p className="text-[11px] font-semibold uppercase tracking-eyebrow text-almendra">
                 En alianza con
               </p>
               <p className="text-sm font-semibold text-carbon">
@@ -61,7 +69,7 @@ export function AboutSection() {
             Conoce más sobre mí
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

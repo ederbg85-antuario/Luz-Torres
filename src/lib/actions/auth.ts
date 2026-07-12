@@ -20,7 +20,7 @@ export async function signIn(
   if (!isSupabaseConfigured()) {
     return {
       error:
-        "Supabase aún no está conectado. Falta configurar las variables de entorno del proyecto (en Vercel o en .env.local).",
+        "El servicio de acceso no está disponible en este momento. Intenta de nuevo en unos minutos.",
     };
   }
 

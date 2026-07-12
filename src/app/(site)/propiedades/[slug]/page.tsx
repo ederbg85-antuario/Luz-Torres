@@ -169,7 +169,7 @@ export default async function PropertyDetailPage({
                   key={s.label}
                   className="rounded-md bg-papel p-4 text-center shadow-soft"
                 >
-                  <s.icon className="mx-auto h-5 w-5 text-vivo" />
+                  <s.icon className="mx-auto h-5 w-5 text-nogal" />
                   <p className="mt-2 font-mono text-lg font-medium text-carbon">
                     {s.value}
                   </p>
@@ -203,8 +203,8 @@ export default async function PropertyDetailPage({
                     key={a}
                     className="flex items-center gap-2 text-sm text-carbon"
                   >
-                    <span className="grid h-5 w-5 place-items-center rounded-full bg-petroleo/10">
-                      <Check className="h-3 w-3 text-petroleo" />
+                    <span className="grid h-5 w-5 place-items-center rounded-full bg-almendra/20">
+                      <Check className="h-3 w-3 text-nogal" />
                     </span>
                     {a}
                   </li>
@@ -257,7 +257,7 @@ export default async function PropertyDetailPage({
                 href={whatsappLink(waMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-accent mt-4 w-full py-3"
+                className="btn-whatsapp mt-4 w-full py-3"
               >
                 <MessageCircle className="h-4 w-4" />
                 Preguntar por WhatsApp

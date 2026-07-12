@@ -44,7 +44,7 @@ export default async function ContactoPage({
       <header className="max-w-2xl">
         <p className="eyebrow">Contacto</p>
         <h1 className="mt-3 text-hero">
-          Hablemos <span className="text-vivo">sin prisa.</span>
+          Hablemos <span className="text-nogal">sin prisa.</span>
         </h1>
         <p className="mt-4 text-[15px] leading-relaxed text-humo">
           {intent === "venta"
@@ -64,7 +64,7 @@ export default async function ContactoPage({
               rel="noopener noreferrer"
               className="flex items-center gap-4 rounded-xl bg-papel p-5 shadow-soft transition-shadow hover:shadow-card"
             >
-              <span className="grid h-11 w-11 place-items-center rounded-md bg-petroleo/8 text-petroleo">
+              <span className="grid h-11 w-11 place-items-center rounded-md bg-almendra/15 text-nogal">
                 <c.icon className="h-5 w-5" />
               </span>
               <span>
@@ -79,7 +79,7 @@ export default async function ContactoPage({
           ))}
 
           <div className="flex items-center gap-4 rounded-xl bg-papel p-5 shadow-soft">
-            <span className="grid h-11 w-11 place-items-center rounded-md bg-petroleo/8 text-petroleo">
+            <span className="grid h-11 w-11 place-items-center rounded-md bg-almendra/15 text-nogal">
               <MapPin className="h-5 w-5" />
             </span>
             <span>

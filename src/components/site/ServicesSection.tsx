@@ -1,5 +1,6 @@
 import { Home, Tag, KeyRound, Scale } from "lucide-react";
 import { SectionHeading } from "./SectionHeading";
+import { Reveal } from "./Reveal";
 
 const SERVICES = [
   {
@@ -27,30 +28,32 @@ const SERVICES = [
 export function ServicesSection() {
   return (
     <section id="servicios" className="lt-container mt-24">
-      <SectionHeading
-        eyebrow="Servicios"
-        title={
-          <>
-            Una sola asesoría. <span className="text-vivo">El proceso completo.</span>
-          </>
-        }
-        intro="Atiendo cuatro tipos de operación. En todos los casos opero el proceso completo, no servicios aislados."
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="Servicios"
+          title={
+            <>
+              Una sola asesoría.{" "}
+              <span className="text-nogal">El proceso completo.</span>
+            </>
+          }
+          intro="Atiendo cuatro tipos de operación. En todos los casos opero el proceso completo, no servicios aislados."
+        />
+      </Reveal>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {SERVICES.map((s) => (
-          <div
-            key={s.title}
-            className="rounded-xl bg-papel p-6 shadow-card transition-shadow hover:shadow-elevated"
-          >
-            <div className="grid h-12 w-12 place-items-center rounded-md bg-petroleo/8 text-petroleo">
-              <s.icon className="h-6 w-6" strokeWidth={1.75} />
+        {SERVICES.map((s, i) => (
+          <Reveal key={s.title} delay={i * 90} className="h-full">
+            <div className="group h-full rounded-xl border-t-2 border-transparent bg-papel p-6 shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:border-almendra hover:shadow-elevated">
+              <div className="grid h-12 w-12 place-items-center rounded-md bg-almendra/15 text-nogal transition-colors duration-300 group-hover:bg-nogal group-hover:text-hueso">
+                <s.icon className="h-6 w-6" strokeWidth={1.75} />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-carbon">
+                {s.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-humo">{s.text}</p>
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-carbon">
-              {s.title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-humo">{s.text}</p>
-          </div>
+          </Reveal>
         ))}
       </div>
     </section>

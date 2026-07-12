@@ -98,7 +98,7 @@ export default async function PropiedadesPage({
     <div className="lt-container py-10">
       <header className="max-w-2xl">
         <p className="eyebrow">Catálogo</p>
-        <h1 className="mt-3 text-hero">{title}</h1>
+        <h1 className="mt-3 text-hero animate-fade-up">{title}</h1>
         <p className="mt-3 text-[15px] text-humo">
           Casas, departamentos, oficinas y más — con ficha técnica completa y
           acompañamiento de principio a fin.
@@ -139,7 +139,7 @@ export default async function PropiedadesPage({
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-nieve">
             <SearchX className="h-6 w-6 text-bruma" />
           </div>
-          <p className="mt-4 font-serif text-2xl text-petroleo">
+          <p className="mt-4 font-serif text-2xl italic text-petroleo">
             No encontré propiedades con esos filtros.
           </p>
           <p className="mx-auto mt-2 max-w-md text-sm text-humo">

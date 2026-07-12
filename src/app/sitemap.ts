@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getPropertySlugs } from "@/lib/data";
+import { SITE_URL } from "@/lib/supabase/config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://luztorres.com";
+  const base = SITE_URL;
 
   const staticRoutes: MetadataRoute.Sitemap = [
     "",

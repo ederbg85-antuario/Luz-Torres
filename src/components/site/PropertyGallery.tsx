@@ -47,7 +47,7 @@ export function PropertyGallery({
               className={cn(
                 "relative aspect-square overflow-hidden rounded-md transition-opacity",
                 i === active
-                  ? "ring-2 ring-vivo ring-offset-2 ring-offset-hueso"
+                  ? "ring-2 ring-almendra ring-offset-2 ring-offset-hueso"
                   : "opacity-70 hover:opacity-100"
               )}
             >

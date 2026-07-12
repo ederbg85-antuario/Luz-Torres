@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -11,13 +12,10 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
   // Sin credenciales configuradas: no bloquear el sitio público.
-  if (!url || !key || key.includes("PEGA_AQUI")) return response;
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return response;
 
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -40,9 +38,12 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isAdminArea = path.startsWith("/admin");
+  // Rutas públicas del panel: login e invitación (los tokens de la
+  // invitación llegan en el hash de la URL, invisible para el servidor).
   const isLogin = path === "/admin/login";
+  const isInvite = path === "/admin/invitacion";
 
-  if (isAdminArea && !isLogin && !user) {
+  if (isAdminArea && !isLogin && !isInvite && !user) {
     const redirect = request.nextUrl.clone();
     redirect.pathname = "/admin/login";
     redirect.searchParams.set("next", path);

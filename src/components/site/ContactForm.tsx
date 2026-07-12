@@ -29,9 +29,9 @@ export function ContactForm({
 
   if (state.status === "success") {
     return (
-      <div className="rounded-xl bg-petroleo/8 p-6 text-center">
-        <CheckCircle2 className="mx-auto h-9 w-9 text-vivo" />
-        <p className="mt-3 font-semibold text-petroleo">Mensaje enviado</p>
+      <div className="rounded-xl bg-almendra/15 p-6 text-center">
+        <CheckCircle2 className="mx-auto h-9 w-9 text-nogal" />
+        <p className="mt-3 font-semibold text-nogal">Mensaje enviado</p>
         <p className="mt-1 text-sm text-humo">{state.message}</p>
       </div>
     );

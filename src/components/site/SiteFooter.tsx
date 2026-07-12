@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Mail, MessageCircle, Instagram, MapPin } from "lucide-react";
+import { Mail, Instagram, MapPin } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { SITE, whatsappLink } from "@/lib/constants";
+import { WhatsAppIcon } from "./WhatsAppFab";
 
 const PROPERTY_LINKS = [
   { href: "/propiedades?operation=venta", label: "Casas y deptos en venta" },
@@ -79,7 +80,7 @@ export function SiteFooter() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 text-sm text-bruma hover:text-hueso"
                 >
-                  <MessageCircle className="h-4 w-4 shrink-0" />
+                  <WhatsAppIcon className="h-4 w-4 shrink-0" />
                   {SITE.phoneDisplay}
                 </a>
               </li>
