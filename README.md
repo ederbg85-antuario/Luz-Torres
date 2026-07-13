@@ -58,7 +58,10 @@ NEXT_PUBLIC_SITE_URL=https://luztorres.com
 En el **SQL Editor** de Supabase, ejecuta en orden:
 
 1. `supabase/migrations/0001_schema.sql` — tablas, seguridad (RLS) y storage.
-2. `supabase/migrations/0002_seed.sql` — datos de ejemplo.
+2. `supabase/migrations/0002_seed.sql` — datos de ejemplo (CRM, agenda, tareas, marketing).
+3. `supabase/migrations/0003_real_properties.sql` — catálogo real de 22 propiedades
+   (reemplaza las propiedades demo de 0002; las fotos se suben aparte al bucket
+   `property-images`, una carpeta por slug).
 
 ### 4. Usuario administrador
 
@@ -119,4 +122,6 @@ scripts/           Script para crear el usuario admin
 - El registro público está deshabilitado: los usuarios del panel solo se crean
   por invitación desde **Equipo**.
 - Las propiedades sin foto usan un diseño de marca como portada.
-- Los copys son provisionales, pensados para SEO; se pueden ajustar después.
+- El catálogo de propiedades (22 fichas) es real, de Imagen Inmobiliaria y
+  Construcción. El CRM, la agenda y las tareas de ejemplo siguen siendo datos
+  demo — bórralos o reemplázalos desde el panel cuando tengas los reales.
