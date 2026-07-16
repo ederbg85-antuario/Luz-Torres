@@ -10,20 +10,34 @@ import {
   Trees,
   MapPin,
   MessageCircle,
-  Check,
+  CalendarDays,
   ChevronRight,
+  Building2,
+  Tag,
+  KeyRound,
+  Landmark,
+  Ruler,
+  Clock,
+  ShieldCheck,
 } from "lucide-react";
 import { getPropertyBySlug, getRelatedProperties } from "@/lib/data";
 import { PropertyGallery } from "@/components/site/PropertyGallery";
 import { PropertyCard } from "@/components/site/PropertyCard";
-import { ContactForm } from "@/components/site/ContactForm";
+import { PropertyMap } from "@/components/site/PropertyMap";
 import {
+  VisitBooking,
+  BookVisitButton,
+} from "@/components/site/VisitBooking";
+import {
+  OPERATION_LABELS,
   PROPERTY_TYPE_LABELS,
+  PROPERTY_STATUS_LABELS,
   SITE,
   statusBadge,
   whatsappLink,
 } from "@/lib/constants";
-import { formatArea, formatPrice } from "@/lib/format";
+import { amenityIcon } from "@/lib/amenity-icons";
+import { formatArea, formatDate, formatPrice } from "@/lib/format";
 
 export async function generateMetadata({
   params,
@@ -89,6 +103,106 @@ export default async function PropertyDetailPage({
     },
   ].filter((s) => s.value);
 
+  const pricePerM2 =
+    property.operation === "venta" && property.area_m2
+      ? property.price / property.area_m2
+      : null;
+
+  const generalData = [
+    {
+      icon: Building2,
+      label: "Tipo de inmueble",
+      value: PROPERTY_TYPE_LABELS[property.property_type],
+    },
+    {
+      icon: Tag,
+      label: "Operación",
+      value: OPERATION_LABELS[property.operation],
+    },
+    {
+      icon: ShieldCheck,
+      label: "Estatus",
+      value: PROPERTY_STATUS_LABELS[property.status],
+    },
+    {
+      icon: Landmark,
+      label: "Precio",
+      value: formatPrice(property.price, property.operation),
+    },
+    ...(pricePerM2
+      ? [
+          {
+            icon: Ruler,
+            label: "Precio por m²",
+            value: formatPrice(Math.round(pricePerM2)),
+          },
+        ]
+      : []),
+    ...(property.area_m2
+      ? [
+          {
+            icon: Maximize,
+            label: "Construcción",
+            value: formatArea(property.area_m2),
+          },
+        ]
+      : []),
+    ...(property.lot_m2
+      ? [
+          {
+            icon: Trees,
+            label: "Terreno",
+            value: formatArea(property.lot_m2),
+          },
+        ]
+      : []),
+    ...(property.bedrooms
+      ? [
+          {
+            icon: BedDouble,
+            label: "Recámaras",
+            value: String(property.bedrooms),
+          },
+        ]
+      : []),
+    ...(property.bathrooms
+      ? [
+          {
+            icon: Bath,
+            label: "Baños",
+            value: String(property.bathrooms),
+          },
+        ]
+      : []),
+    ...(property.parking
+      ? [
+          {
+            icon: Car,
+            label: "Estacionamientos",
+            value: String(property.parking),
+          },
+        ]
+      : []),
+    {
+      icon: Clock,
+      label: "Publicado",
+      value: formatDate(property.created_at),
+    },
+    {
+      icon: KeyRound,
+      label: "Clave",
+      value: `LT-${property.id.slice(0, 6).toUpperCase()}`,
+    },
+  ];
+
+  const fullLocation = [
+    property.colonia,
+    property.municipio,
+    property.estado,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   const waMessage = `Hola Luz, me interesa la propiedad "${property.title}" (${SITE.name}). ¿Podemos agendar una visita?`;
 
   const jsonLd = {
@@ -105,7 +219,7 @@ export default async function PropertyDetailPage({
   };
 
   return (
-    <article className="lt-container py-8">
+    <article className="lt-container pb-28 pt-8 sm:pb-32">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -126,12 +240,12 @@ export default async function PropertyDetailPage({
 
       {/* Encabezado */}
       <header className="mt-5 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-petroleo px-3 py-1 text-[11px] font-semibold text-hueso">
               {statusBadge(property.operation, property.status)}
             </span>
-            <span className="eyebrow">
+            <span className="rounded-full bg-almendra/15 px-3 py-1 text-[11px] font-semibold text-nogal">
               {PROPERTY_TYPE_LABELS[property.property_type]}
             </span>
           </div>
@@ -139,14 +253,20 @@ export default async function PropertyDetailPage({
             {property.title}
           </h1>
           <p className="mt-2 flex items-center gap-1.5 text-[15px] text-humo">
-            <MapPin className="h-4 w-4 text-bruma" />
-            {property.colonia ? `${property.colonia}, ` : ""}
-            {property.municipio}, {property.estado}
+            <MapPin className="h-4 w-4 shrink-0 text-bruma" />
+            {fullLocation}
           </p>
         </div>
-        <p className="font-mono text-3xl font-medium tabular-nums text-petroleo">
-          {formatPrice(property.price, property.operation)}
-        </p>
+        <div className="text-right">
+          <p className="font-mono text-3xl font-medium tabular-nums text-petroleo">
+            {formatPrice(property.price, property.operation)}
+          </p>
+          {pricePerM2 && (
+            <p className="mt-0.5 font-mono text-[13px] text-humo">
+              {formatPrice(Math.round(pricePerM2))} por m²
+            </p>
+          )}
+        </div>
       </header>
 
       {/* Galería */}
@@ -161,7 +281,7 @@ export default async function PropertyDetailPage({
       {/* Contenido */}
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          {/* Ficha técnica */}
+          {/* Ficha técnica rápida */}
           {specs.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {specs.map((s) => (
@@ -181,8 +301,9 @@ export default async function PropertyDetailPage({
 
           {/* Descripción */}
           {property.description && (
-            <section className="mt-8">
-              <h2 className="text-xl font-semibold text-carbon">
+            <section className="mt-10">
+              <p className="eyebrow">Descripción</p>
+              <h2 className="mt-1 text-xl font-semibold text-carbon">
                 Sobre esta propiedad
               </h2>
               <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-humo">
@@ -191,96 +312,114 @@ export default async function PropertyDetailPage({
             </section>
           )}
 
-          {/* Amenidades */}
+          {/* Amenidades con iconos */}
           {property.amenities && property.amenities.length > 0 && (
-            <section className="mt-8">
-              <h2 className="text-xl font-semibold text-carbon">
-                Amenidades y características
+            <section className="mt-10">
+              <p className="eyebrow">Amenidades</p>
+              <h2 className="mt-1 text-xl font-semibold text-carbon">
+                Lo que esta propiedad ofrece
               </h2>
-              <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {property.amenities.map((a) => (
-                  <li
-                    key={a}
-                    className="flex items-center gap-2 text-sm text-carbon"
-                  >
-                    <span className="grid h-5 w-5 place-items-center rounded-full bg-almendra/20">
-                      <Check className="h-3 w-3 text-nogal" />
-                    </span>
-                    {a}
-                  </li>
-                ))}
+              <ul className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {property.amenities.map((a) => {
+                  const Icon = amenityIcon(a);
+                  return (
+                    <li
+                      key={a}
+                      className="flex items-center gap-3 rounded-md bg-papel px-4 py-3 text-sm text-carbon shadow-soft"
+                    >
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-almendra/15">
+                        <Icon className="h-4 w-4 text-nogal" />
+                      </span>
+                      {a}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           )}
 
-          {/* Ubicación */}
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold text-carbon">Ubicación</h2>
-            <div className="mt-3 rounded-xl bg-papel p-5 shadow-soft">
-              <dl className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <dt className="eyebrow">Estado</dt>
-                  <dd className="mt-1 text-sm text-carbon">
-                    {property.estado}
+          {/* Datos generales */}
+          <section className="mt-10">
+            <p className="eyebrow">Ficha técnica</p>
+            <h2 className="mt-1 text-xl font-semibold text-carbon">
+              Datos generales
+            </h2>
+            <dl className="mt-4 overflow-hidden rounded-xl bg-papel shadow-soft">
+              {generalData.map((d, i) => (
+                <div
+                  key={d.label}
+                  className={`flex items-center justify-between gap-4 px-5 py-3 ${
+                    i % 2 === 1 ? "bg-nieve/70" : ""
+                  }`}
+                >
+                  <dt className="flex items-center gap-2.5 text-sm text-humo">
+                    <d.icon className="h-4 w-4 shrink-0 text-bruma" />
+                    {d.label}
+                  </dt>
+                  <dd className="text-right text-sm font-medium text-carbon">
+                    {d.value}
                   </dd>
                 </div>
-                <div>
-                  <dt className="eyebrow">Ciudad / Alcaldía</dt>
-                  <dd className="mt-1 text-sm text-carbon">
-                    {property.municipio}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="eyebrow">Colonia</dt>
-                  <dd className="mt-1 text-sm text-carbon">
-                    {property.colonia ?? "—"}
-                  </dd>
-                </div>
-              </dl>
-              <p className="mt-4 text-[13px] text-humo">
-                Comparto la dirección exacta y coordino la visita de forma
-                personal una vez que conversamos.
-              </p>
+              ))}
+            </dl>
+          </section>
+
+          {/* Ubicación con mapa */}
+          <section className="mt-10">
+            <p className="eyebrow">Ubicación</p>
+            <h2 className="mt-1 text-xl font-semibold text-carbon">
+              ¿Dónde se encuentra?
+            </h2>
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-humo">
+              <MapPin className="h-4 w-4 shrink-0 text-bruma" />
+              {fullLocation}
+            </p>
+            <div className="mt-4">
+              <PropertyMap property={property} />
             </div>
+            <p className="mt-3 text-[13px] text-humo">
+              El mapa muestra la zona de la propiedad. Comparto la dirección
+              exacta al confirmar tu visita.
+            </p>
           </section>
         </div>
 
-        {/* Tarjeta de contacto */}
+        {/* Tarjeta lateral */}
         <aside className="lg:col-span-1">
           <div className="sticky top-24 space-y-4">
             <div className="rounded-xl bg-papel p-5 shadow-card">
-              <p className="eyebrow">{statusBadge(property.operation, property.status)}</p>
+              <p className="eyebrow">
+                {statusBadge(property.operation, property.status)}
+              </p>
               <p className="mt-1 font-mono text-2xl font-medium text-petroleo">
                 {formatPrice(property.price, property.operation)}
               </p>
+
+              <BookVisitButton className="btn-primary mt-4 w-full py-3">
+                <CalendarDays className="h-4 w-4" />
+                Agendar una visita
+              </BookVisitButton>
+              <p className="mt-2 text-center text-[12px] text-humo">
+                Elige fecha y hora en el calendario. Sin compromiso.
+              </p>
+
+              <div className="my-4 flex items-center gap-3">
+                <span className="h-px flex-1 bg-lino" />
+                <span className="text-[11px] font-medium uppercase tracking-wide text-humo">
+                  o
+                </span>
+                <span className="h-px flex-1 bg-lino" />
+              </div>
+
               <a
                 href={whatsappLink(waMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-whatsapp mt-4 w-full py-3"
+                className="btn-whatsapp w-full py-3"
               >
                 <MessageCircle className="h-4 w-4" />
                 Preguntar por WhatsApp
               </a>
-
-              <div className="mt-5 border-t border-lino pt-5">
-                <p className="text-sm font-semibold text-carbon">
-                  Agenda una visita
-                </p>
-                <p className="mt-1 text-[13px] text-humo">
-                  Déjame tus datos y te contacto sin prisa.
-                </p>
-                <div className="mt-4">
-                  <ContactForm
-                    propertyId={property.id}
-                    propertyTitle={property.title}
-                    defaultInterest={
-                      property.operation === "renta" ? "renta" : "compra"
-                    }
-                    compact
-                  />
-                </div>
-              </div>
             </div>
 
             <div className="flex items-center gap-3 rounded-xl bg-papel p-4 shadow-soft">
@@ -296,6 +435,9 @@ export default async function PropertyDetailPage({
                   {SITE.name}
                 </p>
                 <p className="text-[12px] text-humo">{SITE.role}</p>
+                <p className="mt-0.5 text-[12px] text-humo">
+                  Te acompaño personalmente en cada visita.
+                </p>
               </div>
             </div>
           </div>
@@ -313,6 +455,15 @@ export default async function PropertyDetailPage({
           </div>
         </section>
       )}
+
+      {/* Botón fijo + modal de reserva */}
+      <VisitBooking
+        propertyId={property.id}
+        propertyTitle={property.title}
+        operation={property.operation}
+        price={property.price}
+        location={fullLocation}
+      />
     </article>
   );
 }

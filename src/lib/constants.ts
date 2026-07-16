@@ -4,6 +4,7 @@ import type {
   ContactInterest,
   ContactSource,
   ContactStage,
+  FinancingMethod,
   MarketingProvider,
   Operation,
   PropertyStatus,
@@ -119,6 +120,41 @@ export const CONTACT_INTEREST_LABELS: Record<ContactInterest, string> = {
   venta: "Venta",
   inversion: "Inversión",
 };
+
+// ─── Financiamiento (formulario de visitas) ─────────────────────
+export const FINANCING_LABELS: Record<FinancingMethod, string> = {
+  recursos_propios: "Recursos propios",
+  credito_bancario: "Crédito bancario",
+  infonavit: "Crédito Infonavit",
+  fovissste: "Crédito Fovissste",
+  cofinanciamiento: "Cofinanciamiento (banco + Infonavit/Fovissste)",
+  por_definir: "Aún no lo defino",
+  no_aplica: "No aplica (renta)",
+};
+
+/** Opciones que se muestran al agendar una visita de compra. */
+export const FINANCING_OPTIONS: FinancingMethod[] = [
+  "recursos_propios",
+  "credito_bancario",
+  "infonavit",
+  "fovissste",
+  "cofinanciamiento",
+  "por_definir",
+];
+
+/** Días de la semana (isodow: 1=lunes … 7=domingo). */
+export const WEEKDAY_LABELS: Record<number, string> = {
+  1: "Lunes",
+  2: "Martes",
+  3: "Miércoles",
+  4: "Jueves",
+  5: "Viernes",
+  6: "Sábado",
+  7: "Domingo",
+};
+
+/** Duración de cada visita en minutos. */
+export const VISIT_SLOT_MINUTES = 60;
 
 // ─── Agenda ─────────────────────────────────────────────────────
 export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {

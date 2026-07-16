@@ -2,6 +2,8 @@ import "server-only";
 import { createSupabaseServerClient } from "./supabase/server";
 import type {
   Appointment,
+  AvailabilityRule,
+  BlockedSlot,
   Contact,
   ContactStage,
   MarketingIntegration,
@@ -85,6 +87,35 @@ export async function getAppointments(): Promise<AppointmentRow[]> {
       .select("*, contact:contacts(full_name), property:properties(title)")
       .order("starts_at", { ascending: true });
     return (data as AppointmentRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// ─── Disponibilidad de visitas ──────────────────────────────────
+export async function getAvailabilityRules(): Promise<AvailabilityRule[]> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase
+      .from("availability_rules")
+      .select("*")
+      .order("weekday", { ascending: true });
+    return (data as AvailabilityRule[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getBlockedSlots(): Promise<BlockedSlot[]> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const today = new Date().toISOString().slice(0, 10);
+    const { data } = await supabase
+      .from("blocked_slots")
+      .select("*")
+      .gte("date", today)
+      .order("date", { ascending: true });
+    return (data as BlockedSlot[]) ?? [];
   } catch {
     return [];
   }

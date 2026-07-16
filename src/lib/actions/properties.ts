@@ -29,6 +29,8 @@ export type PropertyInput = {
   cover_image: string | null;
   images: string[];
   featured: boolean;
+  lat: number | null;
+  lng: number | null;
 };
 
 export type ActionResult = {
@@ -91,6 +93,8 @@ function toRow(input: PropertyInput) {
     cover_image: input.cover_image,
     images: input.images,
     featured: input.featured,
+    lat: input.lat,
+    lng: input.lng,
   };
 }
 

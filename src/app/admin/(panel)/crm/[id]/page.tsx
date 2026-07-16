@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/Badge";
 import {
   APPOINTMENT_TYPE_LABELS,
   CONTACT_INTEREST_LABELS,
+  FINANCING_LABELS,
   CONTACT_SOURCE_LABELS,
   CONTACT_STAGE_LABELS,
 } from "@/lib/constants";
@@ -94,6 +95,14 @@ export default async function ContactDetailPage({
                   <dt className="text-humo">Interés</dt>
                   <dd className="text-carbon">
                     {CONTACT_INTEREST_LABELS[contact.interest]}
+                  </dd>
+                </div>
+              )}
+              {contact.financing && (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-humo">Financiamiento</dt>
+                  <dd className="text-right text-carbon">
+                    {FINANCING_LABELS[contact.financing]}
                   </dd>
                 </div>
               )}

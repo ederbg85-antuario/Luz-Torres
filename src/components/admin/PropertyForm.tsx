@@ -46,6 +46,8 @@ export function PropertyForm({ property }: { property?: Property }) {
     area_m2: property?.area_m2 ? String(property.area_m2) : "",
     lot_m2: property?.lot_m2 ? String(property.lot_m2) : "",
     featured: property?.featured ?? false,
+    lat: property?.lat ? String(property.lat) : "",
+    lng: property?.lng ? String(property.lng) : "",
   });
 
   const [amenities, setAmenities] = useState<string[]>(
@@ -93,6 +95,8 @@ export function PropertyForm({ property }: { property?: Property }) {
       cover_image: images[0] ?? null,
       images: images.slice(1),
       featured: form.featured,
+      lat: form.lat ? Number(form.lat) : null,
+      lng: form.lng ? Number(form.lng) : null,
     };
 
     startTransition(async () => {
@@ -266,7 +270,32 @@ export function PropertyForm({ property }: { property?: Property }) {
               placeholder="Av. Coyoacán"
             />
           </label>
+          <label className="block">
+            <span className="label">Latitud (opcional, para el mapa)</span>
+            <input
+              value={form.lat}
+              onChange={(e) => set("lat", e.target.value)}
+              inputMode="decimal"
+              className="field"
+              placeholder="19.3721"
+            />
+          </label>
+          <label className="block">
+            <span className="label">Longitud (opcional, para el mapa)</span>
+            <input
+              value={form.lng}
+              onChange={(e) => set("lng", e.target.value)}
+              inputMode="decimal"
+              className="field"
+              placeholder="-99.1651"
+            />
+          </label>
         </div>
+        <p className="mt-3 text-[13px] text-humo">
+          Sin coordenadas, el mapa de la ficha ubica la zona usando colonia y
+          ciudad. Para el punto exacto: en Google Maps, clic derecho sobre el
+          lugar y copia los dos números.
+        </p>
       </section>
 
       {/* Características */}

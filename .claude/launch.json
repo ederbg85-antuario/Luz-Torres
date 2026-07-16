@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "luz-torres-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/ederbasiliogarcia/Luz Torres/Luz Torres Web",
+      "port": 3000
+    }
+  ]
+}

@@ -29,6 +29,15 @@ export type ContactStage =
   | "perdido";
 export type ContactInterest = "compra" | "renta" | "venta" | "inversion";
 
+export type FinancingMethod =
+  | "recursos_propios"
+  | "credito_bancario"
+  | "infonavit"
+  | "fovissste"
+  | "cofinanciamiento"
+  | "por_definir"
+  | "no_aplica";
+
 export type AppointmentType =
   | "visita"
   | "firma"
@@ -94,6 +103,7 @@ export interface Contact {
   budget_max: number | null;
   notes: string | null;
   message: string | null;
+  financing: FinancingMethod | null;
   property_id: string | null;
   assigned_to: string | null;
   last_contacted_at: string | null;
@@ -152,6 +162,32 @@ export interface Profile {
   role: "admin" | "agente";
   avatar_url: string | null;
   created_at: string;
+}
+
+// ─── Agenda de visitas públicas ─────────────────────────────────
+
+/** Horario semanal de disponibilidad. weekday: 1=lunes … 7=domingo. */
+export interface AvailabilityRule {
+  weekday: number;
+  enabled: boolean;
+  start_time: string; // "10:00:00"
+  end_time: string;
+}
+
+/** Bloqueo puntual: día completo (start_time null) o rango de horas. */
+export interface BlockedSlot {
+  id: string;
+  date: string; // "2026-07-20"
+  start_time: string | null;
+  end_time: string | null;
+  reason: string | null;
+  created_at: string;
+}
+
+/** Rango ocupado devuelto por get_taken_slots (sin datos personales). */
+export interface TakenSlot {
+  starts_at: string;
+  ends_at: string;
 }
 
 export interface PropertyFilters {
