@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Mail, MessageCircle, Instagram, MapPin } from "lucide-react";
 import { ContactForm } from "@/components/site/ContactForm";
+import { TrackedLink } from "@/components/site/TrackedLink";
 import { SITE, whatsappLink } from "@/lib/constants";
 import type { ContactInterest } from "@/lib/types";
 
@@ -24,18 +25,21 @@ export default async function ContactoPage({
       label: "WhatsApp",
       value: SITE.phoneDisplay,
       href: whatsappLink("Hola Luz, me gustaría más información."),
+      event: "contacto_whatsapp",
     },
     {
       icon: Mail,
       label: "Correo",
       value: SITE.email,
       href: `mailto:${SITE.email}`,
+      event: "contacto_correo",
     },
     {
       icon: Instagram,
       label: "Instagram",
       value: `@${SITE.instagram}`,
       href: SITE.instagramUrl,
+      event: "contacto_instagram",
     },
   ];
 
@@ -57,9 +61,11 @@ export default async function ContactoPage({
         {/* Canales */}
         <div className="space-y-4">
           {CHANNELS.map((c) => (
-            <a
+            <TrackedLink
               key={c.label}
               href={c.href}
+              event={c.event}
+              params={{ ubicacion: "pagina_contacto" }}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 rounded-xl bg-papel p-5 shadow-soft transition-shadow hover:shadow-card"
@@ -75,7 +81,7 @@ export default async function ContactoPage({
                   {c.value}
                 </span>
               </span>
-            </a>
+            </TrackedLink>
           ))}
 
           <div className="flex items-center gap-4 rounded-xl bg-papel p-5 shadow-soft">

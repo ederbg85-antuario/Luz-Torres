@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { whatsappLink } from "@/lib/constants";
 import { Reveal } from "./Reveal";
 import { WhatsAppIcon } from "./WhatsAppFab";
+import { TrackedLink } from "./TrackedLink";
 
 export function CtaSection() {
   return (
@@ -27,17 +28,19 @@ export function CtaSection() {
               Sin compromiso y sin presión — a tu ritmo.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <a
+              <TrackedLink
                 href={whatsappLink(
                   "Hola Luz, me gustaría agendar una asesoría inmobiliaria."
                 )}
+                event="contacto_whatsapp"
+                params={{ ubicacion: "cta_home" }}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-whatsapp px-6 py-3.5"
               >
                 <WhatsAppIcon className="h-5 w-5" />
                 Escríbeme por WhatsApp
-              </a>
+              </TrackedLink>
               <Link
                 href="/contacto"
                 className="btn px-6 py-3.5 bg-hueso text-sombra hover:-translate-y-0.5 hover:bg-papel hover:shadow-card"

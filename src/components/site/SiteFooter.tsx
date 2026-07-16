@@ -3,6 +3,7 @@ import { Mail, Instagram, MapPin } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { SITE, whatsappLink } from "@/lib/constants";
 import { WhatsAppIcon } from "./WhatsAppFab";
+import { TrackedLink } from "./TrackedLink";
 
 const PROPERTY_LINKS = [
   { href: "/propiedades?operation=venta", label: "Casas y deptos en venta" },
@@ -74,34 +75,40 @@ export function SiteFooter() {
             <h3 className="eyebrow text-bruma">Contacto</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <a
+                <TrackedLink
                   href={whatsappLink()}
+                  event="contacto_whatsapp"
+                  params={{ ubicacion: "footer" }}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 text-sm text-bruma hover:text-hueso"
                 >
                   <WhatsAppIcon className="h-4 w-4 shrink-0" />
                   {SITE.phoneDisplay}
-                </a>
+                </TrackedLink>
               </li>
               <li>
-                <a
+                <TrackedLink
                   href={`mailto:${SITE.email}`}
+                  event="contacto_correo"
+                  params={{ ubicacion: "footer" }}
                   className="flex items-center gap-2.5 text-sm text-bruma hover:text-hueso"
                 >
                   <Mail className="h-4 w-4 shrink-0" />
                   {SITE.email}
-                </a>
+                </TrackedLink>
               </li>
               <li>
-                <a
+                <TrackedLink
                   href={SITE.instagramUrl}
+                  event="contacto_instagram"
+                  params={{ ubicacion: "footer" }}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 text-sm text-bruma hover:text-hueso"
                 >
                   <Instagram className="h-4 w-4 shrink-0" />@{SITE.instagram}
-                </a>
+                </TrackedLink>
               </li>
               <li className="flex items-center gap-2.5 text-sm text-bruma">
                 <MapPin className="h-4 w-4 shrink-0" />

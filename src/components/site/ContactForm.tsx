@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import {
   submitContactForm,
   type ContactFormState,
 } from "@/lib/actions/contact";
 import { CONTACT_INTEREST_LABELS } from "@/lib/constants";
+import { pushEvent } from "@/lib/gtm";
 import type { ContactInterest } from "@/lib/types";
 
 const INITIAL: ContactFormState = { status: "idle", message: "" };
@@ -26,6 +27,16 @@ export function ContactForm({
     submitContactForm,
     INITIAL
   );
+
+  useEffect(() => {
+    if (state.status === "success") {
+      pushEvent("generate_lead", {
+        interest: defaultInterest,
+        property_id: propertyId,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.status]);
 
   if (state.status === "success") {
     return (

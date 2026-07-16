@@ -8,6 +8,7 @@ import { Logo } from "@/components/ui/Logo";
 import { SITE, whatsappLink } from "@/lib/constants";
 import { cn } from "@/lib/format";
 import { WhatsAppIcon } from "./WhatsAppFab";
+import { TrackedLink } from "./TrackedLink";
 
 const NAV = [
   { href: "/", label: "Inicio" },
@@ -48,15 +49,17 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <a
+          <TrackedLink
             href={whatsappLink("Hola Luz, vi tu sitio y me gustaría más información.")}
+            event="contacto_whatsapp"
+            params={{ ubicacion: "header_desktop" }}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-whatsapp hidden px-4 py-2.5 sm:inline-flex"
           >
             <WhatsAppIcon className="h-4 w-4" />
             WhatsApp
-          </a>
+          </TrackedLink>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -86,15 +89,17 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <a
+            <TrackedLink
               href={whatsappLink()}
+              event="contacto_whatsapp"
+              params={{ ubicacion: "header_movil" }}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-whatsapp mt-2"
             >
               <WhatsAppIcon className="h-4 w-4" />
               Escribir por WhatsApp · {SITE.phoneDisplay}
-            </a>
+            </TrackedLink>
           </nav>
         </div>
       )}

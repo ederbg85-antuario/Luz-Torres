@@ -1,4 +1,5 @@
 import { whatsappLink } from "@/lib/constants";
+import { TrackedLink } from "./TrackedLink";
 
 /** Glifo oficial de WhatsApp (trazado del logo, licencia de marca de uso justo). */
 export function WhatsAppIcon({ className }: { className?: string }) {
@@ -20,11 +21,13 @@ export function WhatsAppIcon({ className }: { className?: string }) {
  */
 export function WhatsAppFab() {
   return (
-    <a
+    <TrackedLink
       href={whatsappLink("Hola Luz, me gustaría recibir asesoría inmobiliaria.")}
+      event="contacto_whatsapp"
+      params={{ ubicacion: "fab" }}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Escribir a Luz Torres por WhatsApp"
+      ariaLabel="Escribir a Luz Torres por WhatsApp"
       className="group fixed bottom-5 right-5 z-40 flex items-center"
     >
       {/* Etiqueta desplegable */}
@@ -39,6 +42,6 @@ export function WhatsAppFab() {
           <WhatsAppIcon className="h-7 w-7" />
         </span>
       </span>
-    </a>
+    </TrackedLink>
   );
 }

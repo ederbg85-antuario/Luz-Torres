@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, ArrowRight } from "lucide-react";
+import { TrackedLink } from "@/components/site/TrackedLink";
 import { SITE, whatsappLink } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -82,15 +83,17 @@ export default function SobreLuzPage() {
               la firma.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a
+              <TrackedLink
                 href={whatsappLink("Hola Luz, me gustaría una asesoría.")}
+                event="contacto_whatsapp"
+                params={{ ubicacion: "sobre_luz" }}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-accent"
               >
                 <MessageCircle className="h-4 w-4" />
                 Escríbeme
-              </a>
+              </TrackedLink>
               <Link href="/propiedades" className="btn-ghost">
                 Ver propiedades
               </Link>

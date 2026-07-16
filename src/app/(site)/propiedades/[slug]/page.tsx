@@ -24,6 +24,7 @@ import { getPropertyBySlug, getRelatedProperties } from "@/lib/data";
 import { PropertyGallery } from "@/components/site/PropertyGallery";
 import { PropertyCard } from "@/components/site/PropertyCard";
 import { PropertyMap } from "@/components/site/PropertyMap";
+import { TrackedLink } from "@/components/site/TrackedLink";
 import {
   VisitBooking,
   BookVisitButton,
@@ -411,15 +412,21 @@ export default async function PropertyDetailPage({
                 <span className="h-px flex-1 bg-lino" />
               </div>
 
-              <a
+              <TrackedLink
                 href={whatsappLink(waMessage)}
+                event="contacto_whatsapp"
+                params={{
+                  ubicacion: "ficha_propiedad",
+                  property_id: property.id,
+                  property_title: property.title,
+                }}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-whatsapp w-full py-3"
               >
                 <MessageCircle className="h-4 w-4" />
                 Preguntar por WhatsApp
-              </a>
+              </TrackedLink>
             </div>
 
             <div className="flex items-center gap-3 rounded-xl bg-papel p-4 shadow-soft">

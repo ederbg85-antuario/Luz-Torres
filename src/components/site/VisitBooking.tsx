@@ -19,6 +19,7 @@ import {
   fetchVisitAvailability,
   type VisitAvailability,
 } from "@/lib/actions/visits";
+import { pushEvent } from "@/lib/gtm";
 import {
   FINANCING_LABELS,
   FINANCING_OPTIONS,
@@ -186,6 +187,7 @@ export function VisitBooking({
           propertyId={propertyId}
           propertyTitle={propertyTitle}
           operation={operation}
+          price={price}
           location={location}
           onClose={() => setOpen(false)}
         />
@@ -206,12 +208,14 @@ function BookingModal({
   propertyId,
   propertyTitle,
   operation,
+  price,
   location,
   onClose,
 }: {
   propertyId: string;
   propertyTitle: string;
   operation: Operation;
+  price: number;
   location: string;
   onClose: () => void;
 }) {
@@ -302,6 +306,14 @@ function BookingModal({
     });
     setPending(false);
     if (res.ok) {
+      pushEvent("agenda_visita", {
+        property_id: propertyId,
+        property_title: propertyTitle,
+        operation,
+        financing: form.financing,
+        value: price,
+        currency: "MXN",
+      });
       setStep("listo");
     } else {
       setSubmitError(res.error ?? "No se pudo agendar la visita.");
