@@ -6,10 +6,10 @@ import { WhatsAppIcon } from "./WhatsAppFab";
 import { TrackedLink } from "./TrackedLink";
 
 const PROPERTY_LINKS = [
-  { href: "/propiedades?operation=venta", label: "Casas y deptos en venta" },
-  { href: "/propiedades?operation=renta", label: "Propiedades en renta" },
-  { href: "/propiedades?property_type=oficina", label: "Oficinas" },
-  { href: "/propiedades?property_type=bodega", label: "Bodegas" },
+  { href: "/propiedades/venta/casas", label: "Casas en venta" },
+  { href: "/propiedades/venta/departamentos", label: "Departamentos en venta" },
+  { href: "/propiedades/venta", label: "Todo en venta" },
+  { href: "/propiedades/renta", label: "Propiedades en renta" },
 ];
 
 const NAV_LINKS = [

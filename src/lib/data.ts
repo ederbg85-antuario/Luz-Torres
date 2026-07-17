@@ -141,6 +141,28 @@ export async function getFilterOptions(): Promise<{
   }
 }
 
+/**
+ * Índice mínimo (operación, tipo, estado, municipio) de todo el inventario.
+ * Alimenta la generación estática y la resolución de las páginas de categoría.
+ */
+export async function getSeoIndex(): Promise<
+  Pick<Property, "operation" | "property_type" | "estado" | "municipio">[]
+> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const supabase = createSupabasePublicClient();
+    const { data } = await supabase
+      .from("properties")
+      .select("operation, property_type, estado, municipio");
+    return (data as Pick<
+      Property,
+      "operation" | "property_type" | "estado" | "municipio"
+    >[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function getPropertySlugs(): Promise<
   { slug: string; updated_at: string }[]
 > {

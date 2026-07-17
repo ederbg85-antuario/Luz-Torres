@@ -39,6 +39,11 @@ import {
 } from "@/lib/constants";
 import { amenityIcon } from "@/lib/amenity-icons";
 import { formatArea, formatDate, formatPrice } from "@/lib/format";
+import {
+  propertyBreadcrumb,
+  propertyJsonLd,
+  propertyMetadata,
+} from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -48,17 +53,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const property = await getPropertyBySlug(slug);
   if (!property) return { title: "Propiedad no encontrada" };
-  return {
-    title: property.title,
-    description:
-      property.description?.slice(0, 160) ??
-      `${property.title} — ${formatPrice(property.price, property.operation)}.`,
-    openGraph: {
-      title: property.title,
-      description: property.description ?? property.title,
-      images: property.cover_image ? [property.cover_image] : undefined,
-    },
-  };
+  return propertyMetadata(property);
 }
 
 export default async function PropertyDetailPage({
@@ -206,18 +201,8 @@ export default async function PropertyDetailPage({
 
   const waMessage = `Hola Luz, me interesa la propiedad "${property.title}" (${SITE.name}). ¿Podemos agendar una visita?`;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Residence",
-    name: property.title,
-    description: property.description ?? property.title,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: property.municipio,
-      addressRegion: property.estado,
-      addressCountry: "MX",
-    },
-  };
+  const jsonLd = propertyJsonLd(property, images);
+  const crumbs = propertyBreadcrumb(property);
 
   return (
     <article className="lt-container pb-28 pt-8 sm:pb-32">
@@ -226,17 +211,20 @@ export default async function PropertyDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Breadcrumb */}
+      {/* Breadcrumb enriquecido: Inicio › Propiedades › {Tipo} en {op} › {Municipio} › {título} */}
       <nav className="flex flex-wrap items-center gap-1.5 text-[13px] text-humo">
-        <Link href="/" className="hover:text-carbon">
-          Inicio
-        </Link>
-        <ChevronRight className="h-3.5 w-3.5" />
-        <Link href="/propiedades" className="hover:text-carbon">
-          Propiedades
-        </Link>
-        <ChevronRight className="h-3.5 w-3.5" />
-        <span className="text-carbon">{property.title}</span>
+        {crumbs.map((c, i) => (
+          <span key={c.path} className="flex items-center gap-1.5">
+            {i > 0 && <ChevronRight className="h-3.5 w-3.5" />}
+            {i < crumbs.length - 1 ? (
+              <Link href={c.path} className="hover:text-carbon">
+                {c.name}
+              </Link>
+            ) : (
+              <span className="line-clamp-1 text-carbon">{c.name}</span>
+            )}
+          </span>
+        ))}
       </nav>
 
       {/* Encabezado */}

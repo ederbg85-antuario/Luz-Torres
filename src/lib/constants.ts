@@ -67,6 +67,27 @@ export const PROPERTY_TYPES = Object.keys(
   PROPERTY_TYPE_LABELS
 ) as PropertyType[];
 
+/**
+ * Slugs de URL para las páginas de categoría (plural, amigables para SEO).
+ * Se usan en rutas reales tipo `/propiedades/venta/casas/benito-juarez`.
+ */
+export const TYPE_SLUG: Record<PropertyType, string> = {
+  casa: "casas",
+  departamento: "departamentos",
+  oficina: "oficinas",
+  bodega: "bodegas",
+  terreno: "terrenos",
+  local: "locales-comerciales",
+};
+
+/** Reverso de TYPE_SLUG: del slug de URL al tipo de dominio. */
+export const SLUG_TO_TYPE: Record<string, PropertyType> = Object.fromEntries(
+  Object.entries(TYPE_SLUG).map(([type, slug]) => [slug, type as PropertyType])
+) as Record<string, PropertyType>;
+
+/** Operaciones válidas como segmento de URL (coinciden con el valor de dominio). */
+export const OPERATIONS = ["venta", "renta"] as const;
+
 // ─── Estatus de propiedad ───────────────────────────────────────
 export const PROPERTY_STATUS_LABELS: Record<PropertyStatus, string> = {
   disponible: "Disponible",

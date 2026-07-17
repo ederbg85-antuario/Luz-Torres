@@ -5,22 +5,42 @@ import { ProcessSection } from "@/components/site/ProcessSection";
 import { CoverageSection } from "@/components/site/CoverageSection";
 import { AboutSection } from "@/components/site/AboutSection";
 import { CtaSection } from "@/components/site/CtaSection";
+import type { Metadata } from "next";
 import { getFeaturedProperties } from "@/lib/data";
 import { SITE } from "@/lib/constants";
+import { SITE_URL } from "@/lib/supabase/config";
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
+  "@id": `${SITE_URL}/#agent`,
   name: "Luz Torres · Asesora Inmobiliaria",
   description:
     "Asesoría inmobiliaria integral en México: compra, venta y renta de casas, departamentos, oficinas y más.",
-  areaServed: "México",
-  email: SITE.email,
+  url: SITE_URL,
+  image: `${SITE_URL}/luz-keys.jpg`,
   telephone: "+525656699894",
+  email: SITE.email,
   knowsLanguage: "es-MX",
   priceRange: "$$",
+  sameAs: [SITE.instagramUrl],
+  areaServed: [
+    "Ciudad de México",
+    "Estado de México",
+    "Hidalgo",
+    "Morelos",
+    "Guerrero",
+  ].map((name) => ({ "@type": "AdministrativeArea", name })),
+  address: {
+    "@type": "PostalAddress",
+    addressCountry: "MX",
+  },
 };
 
 export default async function HomePage() {

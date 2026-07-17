@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SearchX } from "lucide-react";
-import { getProperties, getFilterOptions } from "@/lib/data";
+import { getProperties, getFilterOptions, getSeoIndex } from "@/lib/data";
 import { PropertyCard } from "@/components/site/PropertyCard";
 import { PropertyFilters } from "@/components/site/PropertyFilters";
 import { SortSelect } from "@/components/site/SortSelect";
 import { PROPERTY_TYPE_PLURAL } from "@/lib/constants";
+import { categoryChips } from "@/lib/seo";
 import type {
   Operation,
   PropertyFilters as Filters,
@@ -68,18 +69,14 @@ function buildTitle(f: Filters): string {
   return title;
 }
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}): Promise<Metadata> {
-  const filters = parseFilters(await searchParams);
-  const title = buildTitle(filters);
-  return {
-    title,
-    description: `${title} con asesoría inmobiliaria integral. Búsqueda, crédito, trámites legales y acompañamiento completo con Luz Torres.`,
-  };
-}
+// Metadata estable: los estados filtrados por query params canonicalizan al
+// catálogo base para no competir como duplicados en el índice de Google.
+export const metadata: Metadata = {
+  title: { absolute: "Propiedades en venta y renta en México | Luz Torres" },
+  description:
+    "Casas, departamentos, oficinas, bodegas y terrenos con asesoría integral: búsqueda, crédito, trámites y acompañamiento. Agenda tu visita con Luz Torres.",
+  alternates: { canonical: "/propiedades" },
+};
 
 export default async function PropiedadesPage({
   searchParams,
@@ -87,12 +84,14 @@ export default async function PropiedadesPage({
   searchParams: Promise<SearchParams>;
 }) {
   const filters = parseFilters(await searchParams);
-  const [properties, options] = await Promise.all([
+  const [properties, options, seoIndex] = await Promise.all([
     getProperties(filters),
     getFilterOptions(),
+    getSeoIndex(),
   ]);
 
   const title = buildTitle(filters);
+  const chips = categoryChips(seoIndex);
 
   return (
     <div className="lt-container py-10">
@@ -104,6 +103,24 @@ export default async function PropiedadesPage({
           acompañamiento de principio a fin.
         </p>
       </header>
+
+      {/* Accesos directos a categorías (interlinking + rutas indexables) */}
+      {chips.length > 0 && (
+        <nav
+          aria-label="Categorías de propiedades"
+          className="mt-6 flex flex-wrap gap-2.5"
+        >
+          {chips.map((c) => (
+            <Link
+              key={c.path}
+              href={c.path}
+              className="rounded-full bg-papel px-4 py-2 text-sm capitalize text-carbon shadow-soft transition-colors hover:bg-almendra/10 hover:text-nogal"
+            >
+              {c.label}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <div className="mt-8">
         <Suspense fallback={<div className="h-24" />}>
