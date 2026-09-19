@@ -1,55 +1,31 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { whatsappLink } from "@/lib/constants";
-import { Reveal } from "./Reveal";
-import { WhatsAppIcon } from "./WhatsAppFab";
 import { TrackedLink } from "./TrackedLink";
-
+import { Reveal } from "./Reveal";
 export function CtaSection() {
   return (
-    <section className="lt-container mt-24">
+    <section className="lt-container mt-20">
       <Reveal>
-        <div className="relative overflow-hidden rounded-2xl bg-sombra px-8 py-14 text-center sm:px-14">
-          {/* Resplandor cálido sutil */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-almendra/10 blur-3xl"
-          />
-          <div className="relative">
-            <p className="eyebrow text-almendra-claro">
-              Si quieres trabajar conmigo
-            </p>
-            <h2 className="mx-auto mt-3 max-w-2xl text-hero text-hueso">
-              Hablemos{" "}
-              <span className="text-almendra-claro">sin prisa.</span>
+        <div className="flex flex-col items-start justify-between gap-7 rounded-2xl bg-[#f5f7f6] p-8 sm:flex-row sm:items-center sm:p-10">
+          <div>
+            <p className="eyebrow">Hablemos</p>
+            <h2 className="mt-3 text-3xl font-medium sm:text-4xl">
+              Tu siguiente paso empieza aquí.
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-bruma">
-              Cuéntame qué buscas y vemos juntos qué opciones reales tienes.
-              Sin compromiso y sin presión — a tu ritmo.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <TrackedLink
-                href={whatsappLink(
-                  "Hola Luz, me gustaría solicitar una asesoría inmobiliaria."
-                )}
-                event="contacto_whatsapp"
-                params={{ ubicacion: "cta_home" }}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-whatsapp px-6 py-3.5"
-              >
-                <WhatsAppIcon className="h-5 w-5" />
-                Escríbeme por WhatsApp
-              </TrackedLink>
-              <Link
-                href="/contacto"
-                className="btn px-6 py-3.5 bg-hueso text-sombra hover:-translate-y-0.5 hover:bg-papel hover:shadow-card"
-              >
-                Enviar un mensaje
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
           </div>
+          <TrackedLink
+            href={whatsappLink(
+              "Hola Luz, me gustaría recibir asesoría inmobiliaria.",
+            )}
+            event="contacto_whatsapp"
+            params={{ ubicacion: "cta_home" }}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary shrink-0 px-7 py-4"
+          >
+            Escribir a Luz
+            <ArrowUpRight size={18} />
+          </TrackedLink>
         </div>
       </Reveal>
     </section>

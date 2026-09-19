@@ -25,6 +25,12 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (
+      !window.IntersectionObserver ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    el.classList.add("reveal-ready");
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -35,7 +41,7 @@ export function Reveal({
           }
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
     );
 
     observer.observe(el);

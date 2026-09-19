@@ -1,12 +1,9 @@
 import { Hero } from "@/components/site/Hero";
-import { ServicesSection } from "@/components/site/ServicesSection";
 import { FeaturedSection } from "@/components/site/FeaturedSection";
-import { ProcessSection } from "@/components/site/ProcessSection";
-import { CoverageSection } from "@/components/site/CoverageSection";
-import { AboutSection } from "@/components/site/AboutSection";
+import { HomeJourney } from "@/components/site/HomeJourney";
 import { CtaSection } from "@/components/site/CtaSection";
 import type { Metadata } from "next";
-import { getFeaturedProperties } from "@/lib/data";
+import { getFeaturedProperties, getPropertyBySlug } from "@/lib/data";
 import { SITE } from "@/lib/constants";
 import { SITE_URL } from "@/lib/supabase/config";
 
@@ -44,7 +41,14 @@ const jsonLd = {
 };
 
 export default async function HomePage() {
-  const featured = await getFeaturedProperties(6);
+  const [featured, alpes] = await Promise.all([
+    getFeaturedProperties(6),
+    getPropertyBySlug("departamento-venta-los-alpes-alvaro-obregon-iap7712491"),
+  ]);
+  const selection = [
+    ...(alpes ? [alpes] : []),
+    ...featured.filter((p) => p.id !== alpes?.id),
+  ].slice(0, 6);
 
   return (
     <>
@@ -52,12 +56,9 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Hero />
-      <ServicesSection />
-      <FeaturedSection properties={featured} />
-      <ProcessSection />
-      <CoverageSection />
-      <AboutSection />
+      <Hero properties={selection} />
+      <FeaturedSection properties={selection} />
+      <HomeJourney />
       <CtaSection />
       <div className="pb-10" />
     </>

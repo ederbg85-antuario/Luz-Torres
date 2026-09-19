@@ -42,11 +42,11 @@ const config: Config = {
         "2xl": "36px",
       },
       boxShadow: {
-        soft: "0 2px 12px -4px rgba(74, 52, 38, 0.10)",
-        card: "0 8px 28px -10px rgba(74, 52, 38, 0.16)",
-        elevated: "0 18px 48px -16px rgba(74, 52, 38, 0.24)",
-        floating: "0 28px 70px -20px rgba(46, 33, 23, 0.32)",
-        "glow-almendra": "0 0 0 1px rgba(176, 137, 104, 0.25), 0 12px 40px -12px rgba(111, 78, 55, 0.35)",
+        soft: "0 4px 20px -5px rgba(35, 43, 40, 0.12)",
+        card: "0 12px 40px -12px rgba(35, 43, 40, 0.20)",
+        elevated: "0 20px 60px -16px rgba(74, 52, 38, 0.25)",
+        floating: "0 24px 70px -20px rgba(46, 33, 23, 0.30)",
+        "glow-almendra": "0 12px 40px -12px rgba(111, 78, 55, 0.35)",
       },
       letterSpacing: {
         eyebrow: "0.22em",

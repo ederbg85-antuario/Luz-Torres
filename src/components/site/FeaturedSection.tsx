@@ -5,11 +5,7 @@ import { SectionHeading } from "./SectionHeading";
 import { PropertyCard } from "./PropertyCard";
 import { Reveal } from "./Reveal";
 
-export function FeaturedSection({
-  properties,
-}: {
-  properties: Property[];
-}) {
+export function FeaturedSection({ properties }: { properties: Property[] }) {
   return (
     <section className="lt-container mt-24">
       <Reveal>
@@ -21,7 +17,6 @@ export function FeaturedSection({
                 Propiedades <span className="text-nogal">destacadas</span>
               </>
             }
-            intro="Una selección del catálogo actual. Cada propiedad incluye ficha técnica, fotografía y acompañamiento completo."
           />
           <Link href="/propiedades" className="btn-ghost">
             Ver todas
@@ -45,8 +40,8 @@ export function FeaturedSection({
               Pronto, nuevas propiedades.
             </p>
             <p className="mx-auto mt-2 max-w-md text-sm text-humo">
-              Estoy preparando el catálogo. Mientras tanto, escríbeme y te
-              aviso en cuanto tenga una opción que encaje con lo que buscas.
+              Estoy preparando el catálogo. Mientras tanto, escríbeme y te aviso
+              en cuanto tenga una opción que encaje con lo que buscas.
             </p>
             <Link href="/contacto" className="btn-accent mt-6">
               Quiero que me avises

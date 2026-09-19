@@ -1,88 +1,100 @@
 import Image from "next/image";
-import { ShieldCheck, Landmark, FileCheck2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, MapPin } from "lucide-react";
+import type { Property } from "@/lib/types";
+import { formatPrice } from "@/lib/format";
 import { SearchBar } from "./SearchBar";
 
-const TRUST = [
-  { icon: Landmark, text: "Infonavit · FOVISSSTE · Bancario" },
-  { icon: FileCheck2, text: "Trámites legales y notaría" },
-  { icon: ShieldCheck, text: "Acompañamiento de principio a fin" },
-];
-
-export function Hero() {
+export function Hero({ properties }: { properties: Property[] }) {
+  const main =
+    properties.find((p) => p.slug.includes("los-alpes")) ?? properties[0];
+  const secondary =
+    properties.find((p) => p.slug.includes("el-manzano")) ?? properties[1];
   return (
-    <section className="relative overflow-hidden">
-      {/* Fondo cálido: resplandores café/almendra sobre hueso */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-      >
-        <div className="absolute -top-32 right-[-10%] h-[480px] w-[480px] rounded-full bg-almendra/15 blur-3xl" />
-        <div className="absolute bottom-[-20%] left-[-8%] h-[420px] w-[420px] rounded-full bg-nogal/10 blur-3xl" />
-        <div className="absolute left-1/3 top-1/4 h-64 w-64 rounded-full bg-vivo/5 blur-3xl" />
-      </div>
-
-      <div className="lt-container pt-10 lg:pt-16">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-          <div>
-            <p className="eyebrow animate-fade-up">
-              Asesoría inmobiliaria · Cobertura nacional
-            </p>
-            <h1 className="mt-5 text-display animate-fade-up delay-75">
-              Casas y departamentos{" "}
-              <span className="text-nogal">en venta y renta</span> en México.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-humo animate-fade-up delay-150">
-              Soy Luz Torres. Te acompaño en la compra, venta o renta de tu
-              propiedad con un proceso ordenado de principio a fin: búsqueda,
-              crédito, trámites legales y entrega de llaves.
-            </p>
-
-            <ul className="mt-8 space-y-2.5 animate-fade-up delay-300">
-              {TRUST.map((t) => (
-                <li
-                  key={t.text}
-                  className="flex items-center gap-3 text-[14px] font-medium text-carbon"
-                >
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-almendra/15 text-nogal">
-                    <t.icon className="h-4 w-4" strokeWidth={2} />
-                  </span>
-                  {t.text}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="relative animate-scale-in delay-150">
-            {/* Marco café desplazado detrás de la foto */}
-            <div
-              aria-hidden
-              className="absolute -bottom-4 -right-4 hidden h-full w-full rounded-2xl border-2 border-almendra/40 sm:block"
-            />
-            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-cacao shadow-elevated sm:aspect-[5/5] lg:aspect-[4/5]">
-              <Image
-                src="/luz-keys.jpg"
-                alt="Luz Torres, asesora inmobiliaria"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 45vw"
-                className="object-cover object-top"
-              />
-              {/* Velo cálido inferior para dar profundidad */}
-              <div
-                aria-hidden
-                className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-cacao-oscuro/50 to-transparent"
-              />
-            </div>
-            <div className="absolute -bottom-5 -left-5 hidden max-w-[260px] rounded-xl border-l-4 border-almendra bg-papel px-5 py-4 shadow-card animate-float sm:block">
-              <p className="font-serif text-lg italic leading-snug text-petroleo">
-                “Mi trabajo es que no se sienta complicado.”
-              </p>
-            </div>
+    <section className="lt-container pb-6 pt-7 sm:pt-12">
+      <div className="grid items-center gap-9 lg:grid-cols-[.95fr_1.05fr] lg:gap-14">
+        <div className="relative z-10 py-3 lg:py-10">
+          <p className="eyebrow animate-fade-up">
+            Casas y departamentos · México
+          </p>
+          <h1 className="mt-5 max-w-xl text-[44px] font-medium leading-[1.04] tracking-[-.045em] sm:text-[62px] lg:text-[70px] animate-fade-up delay-75">
+            Tu próximo
+            <br />
+            espacio.
+            <br />
+            <span className="font-serif font-normal italic text-nogal">
+              A tu manera.
+            </span>
+          </h1>
+          <p className="mt-5 max-w-sm text-base leading-relaxed text-humo animate-fade-up delay-150">
+            Compra, renta o vende con Luz Torres.
+            <br />
+            Cada paso, bien acompañado.
+          </p>
+          <div className="mt-8 animate-fade-up delay-300">
+            <SearchBar />
           </div>
         </div>
-
-        <div className="mt-12 lg:mt-14 animate-fade-up delay-450">
-          <SearchBar />
+        <div className="relative pb-12 lg:pb-8">
+          <Link
+            href={main ? `/propiedades/${main.slug}` : "/propiedades"}
+            className="group relative block aspect-[5/4] overflow-hidden rounded-2xl bg-petroleo shadow-elevated sm:aspect-[6/5] lg:aspect-[.93]"
+          >
+            <Image
+              src={main?.cover_image ?? "/luz-outdoor.jpg"}
+              alt={main?.title ?? "Luz Torres, asesora inmobiliaria"}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 52vw"
+              className="hero-photo object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+            <span className="absolute left-5 top-5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-petroleo shadow-card">
+              Espacios para descubrir
+            </span>
+            <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 text-white">
+              <div>
+                <p className="flex items-center gap-1.5 text-sm text-white/85">
+                  <MapPin size={14} />
+                  {main?.colonia ?? "Conoce el catálogo"}
+                </p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {main ? formatPrice(main.price) : "Encuentra tu lugar"}
+                </p>
+              </div>
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-petroleo shadow-card transition-transform group-hover:rotate-45">
+                <ArrowUpRight size={22} />
+              </span>
+            </div>
+          </Link>
+          {secondary && (
+            <Link
+              href={`/propiedades/${secondary.slug}`}
+              className="absolute -bottom-1 left-5 right-5 flex items-center gap-4 rounded-lg bg-white p-3 shadow-floating sm:left-auto sm:right-[-12px] sm:w-[320px]"
+            >
+              <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md">
+                <Image
+                  src={secondary.cover_image ?? "/luz-keys.jpg"}
+                  alt={secondary.title}
+                  fill
+                  sizes="96px"
+                  className="object-cover"
+                />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-nogal">
+                  También en venta
+                </p>
+                <p className="mt-1 truncate text-sm font-semibold">
+                  {secondary.colonia}
+                </p>
+                <p className="mt-1 text-sm text-humo">
+                  {formatPrice(secondary.price)}
+                </p>
+              </div>
+              <ArrowUpRight className="ml-auto h-5 w-5 shrink-0 text-nogal" />
+            </Link>
+          )}
         </div>
       </div>
     </section>

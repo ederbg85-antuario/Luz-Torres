@@ -9,7 +9,7 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="public-site flex min-h-screen flex-col bg-white">
       <PublicTracking />
       <SiteHeader />
       <main className="flex-1">{children}</main>

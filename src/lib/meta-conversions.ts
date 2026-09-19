@@ -12,6 +12,7 @@ type MetaServerEvent = {
   email?: string;
   phone?: string;
   contentName?: string;
+  contentCategory?: string;
   contentIds?: string[];
   value?: number;
   currency?: string;
@@ -40,9 +41,13 @@ export function createMetaEventId() {
 export async function sendMetaServerEvent(event: MetaServerEvent) {
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
   const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
-  if (!pixelId || !accessToken) return { sent: false, reason: "not_configured" };
+  if (!pixelId || !accessToken)
+    return { sent: false, reason: "not_configured" };
 
-  const [requestHeaders, cookieStore] = await Promise.all([headers(), cookies()]);
+  const [requestHeaders, cookieStore] = await Promise.all([
+    headers(),
+    cookies(),
+  ]);
   const email = event.email?.trim().toLowerCase();
   const phone = event.phone ? normalizePhone(event.phone) : "";
   const forwardedFor = requestHeaders.get("x-forwarded-for");
@@ -62,6 +67,9 @@ export async function sendMetaServerEvent(event: MetaServerEvent) {
 
   const customData: Record<string, unknown> = {
     ...(event.contentName ? { content_name: event.contentName } : {}),
+    ...(event.contentCategory
+      ? { content_category: event.contentCategory }
+      : {}),
     ...(event.contentIds?.length
       ? { content_ids: event.contentIds, content_type: "product" }
       : {}),
@@ -92,11 +100,15 @@ export async function sendMetaServerEvent(event: MetaServerEvent) {
             : {}),
         }),
         cache: "no-store",
-      }
+        signal: AbortSignal.timeout(4000),
+      },
     );
 
     if (!response.ok) {
-      console.error("Meta Conversions API respondió con error", response.status);
+      console.error(
+        "Meta Conversions API respondió con error",
+        response.status,
+      );
       return { sent: false, reason: "api_error" };
     }
     return { sent: true };

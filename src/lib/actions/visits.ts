@@ -10,10 +10,7 @@ import type {
   FinancingMethod,
   TakenSlot,
 } from "@/lib/types";
-import {
-  createMetaEventId,
-  sendMetaServerEvent,
-} from "@/lib/meta-conversions";
+import { createMetaEventId, sendMetaServerEvent } from "@/lib/meta-conversions";
 
 // ─── Disponibilidad pública ─────────────────────────────────────
 
@@ -31,7 +28,7 @@ const EMPTY: VisitAvailability = { rules: [], blocked: [], taken: [] };
  */
 export async function fetchVisitAvailability(
   fromISO: string,
-  toISO: string
+  toISO: string,
 ): Promise<VisitAvailability> {
   if (!isSupabaseConfigured()) return EMPTY;
   try {
@@ -72,10 +69,14 @@ export type VisitRequestInput = {
   company?: string;
 };
 
-export type VisitRequestResult = { ok: boolean; error?: string; eventId?: string };
+export type VisitRequestResult = {
+  ok: boolean;
+  error?: string;
+  eventId?: string;
+};
 
 export async function requestVisit(
-  input: VisitRequestInput
+  input: VisitRequestInput,
 ): Promise<VisitRequestResult> {
   if (input.company) return { ok: true };
 
@@ -87,6 +88,15 @@ export async function requestVisit(
   }
   if (!input.preferred_date || !input.preferred_time) {
     return { ok: false, error: "Elige la fecha y hora que prefieres." };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())) {
+    return { ok: false, error: "Escribe un correo electrónico válido." };
+  }
+  if (!/^\d{10,15}$/.test(input.phone.replace(/\D/g, ""))) {
+    return {
+      ok: false,
+      error: "Escribe un teléfono válido de 10 a 15 dígitos.",
+    };
   }
   if (!isSupabaseConfigured()) {
     return {
@@ -118,11 +128,12 @@ export async function requestVisit(
     }
     const eventId = createMetaEventId();
     await sendMetaServerEvent({
-      eventName: "Schedule",
+      eventName: "Lead",
       eventId,
       email: input.email.trim(),
       phone: input.phone.trim(),
       contentName: "Solicitud de visita",
+      contentCategory: "visit_request",
       contentIds: [input.property_id],
     });
     return { ok: true, eventId };

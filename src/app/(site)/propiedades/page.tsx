@@ -52,10 +52,7 @@ function parseFilters(sp: SearchParams): Filters {
     priceMax: num(sp.priceMax),
     bedrooms: num(sp.bedrooms),
     bathrooms: num(sp.bathrooms),
-    sort:
-      sort === "precio_asc" || sort === "precio_desc"
-        ? sort
-        : "recientes",
+    sort: sort === "precio_asc" || sort === "precio_desc" ? sort : "recientes",
   };
 }
 
@@ -74,7 +71,7 @@ function buildTitle(f: Filters): string {
 export const metadata: Metadata = {
   title: { absolute: "Propiedades en venta y renta en México | Luz Torres" },
   description:
-    "Casas, departamentos, oficinas, bodegas y terrenos con asesoría integral: búsqueda, crédito, trámites y acompañamiento. Agenda tu visita con Luz Torres.",
+    "Casas, departamentos, oficinas, bodegas y terrenos con asesoría integral. Consulta fotografías, precios y solicita una visita con Luz Torres.",
   alternates: { canonical: "/propiedades" },
 };
 
@@ -99,8 +96,7 @@ export default async function PropiedadesPage({
         <p className="eyebrow">Catálogo</p>
         <h1 className="mt-3 text-hero animate-fade-up">{title}</h1>
         <p className="mt-3 text-[15px] text-humo">
-          Casas, departamentos, oficinas y más — con ficha técnica completa y
-          acompañamiento de principio a fin.
+          Encuentra el espacio que va contigo.
         </p>
       </header>
 
@@ -133,9 +129,7 @@ export default async function PropiedadesPage({
 
       <div className="mt-6 flex items-center justify-between gap-4">
         <p className="text-sm text-humo">
-          <span className="font-semibold text-carbon">
-            {properties.length}
-          </span>{" "}
+          <span className="font-semibold text-carbon">{properties.length}</span>{" "}
           {properties.length === 1
             ? "propiedad encontrada"
             : "propiedades encontradas"}
@@ -160,8 +154,8 @@ export default async function PropiedadesPage({
             No encontré propiedades con esos filtros.
           </p>
           <p className="mx-auto mt-2 max-w-md text-sm text-humo">
-            Ajusta la búsqueda o cuéntame qué buscas — con gusto te aviso
-            cuando tenga una opción que encaje.
+            Ajusta la búsqueda o cuéntame qué buscas — con gusto te aviso cuando
+            tenga una opción que encaje.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link href="/propiedades" className="btn-ghost">

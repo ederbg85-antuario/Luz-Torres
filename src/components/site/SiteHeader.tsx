@@ -26,9 +26,13 @@ export function SiteHeader() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-lino/70 bg-hueso/85 backdrop-blur-md">
-      <div className="lt-container flex h-[72px] items-center justify-between">
-        <Link href="/" className="text-petroleo" aria-label="Luz Torres · Inicio">
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-6">
+      <div className="lt-container flex h-[72px] items-center justify-between gap-3 rounded-xl bg-white/95 shadow-card backdrop-blur-xl">
+        <Link
+          href="/"
+          className="text-petroleo"
+          aria-label="Luz Torres · Inicio"
+        >
           <Logo className="h-7" />
         </Link>
 
@@ -40,8 +44,8 @@ export function SiteHeader() {
               className={cn(
                 "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
                 isActive(item.href)
-                  ? "bg-papel text-petroleo shadow-soft"
-                  : "text-humo hover:bg-papel/60 hover:text-carbon"
+                  ? "bg-petroleo text-white shadow-soft"
+                  : "text-humo hover:bg-papel/60 hover:text-carbon",
               )}
             >
               {item.label}
@@ -51,12 +55,14 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <TrackedLink
-            href={whatsappLink("Hola Luz, vi tu sitio y me gustaría más información.")}
+            href={whatsappLink(
+              "Hola Luz, vi tu sitio y me gustaría más información.",
+            )}
             event="contacto_whatsapp"
             params={{ ubicacion: "header_desktop" }}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-whatsapp hidden px-4 py-2.5 sm:inline-flex"
+            className="btn-accent hidden px-4 py-2.5 lg:inline-flex"
           >
             <WhatsAppIcon className="h-4 w-4" />
             WhatsApp
@@ -66,6 +72,8 @@ export function SiteHeader() {
             onClick={() => setOpen((v) => !v)}
             className="grid h-10 w-10 place-items-center rounded-full bg-papel text-carbon shadow-soft md:hidden"
             aria-label="Menú"
+            aria-expanded={open}
+            aria-controls="mobile-site-menu"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -73,7 +81,10 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-lino bg-hueso md:hidden">
+        <div
+          id="mobile-site-menu"
+          className="mt-2 rounded-xl bg-white shadow-elevated md:hidden"
+        >
           <nav className="lt-container flex flex-col gap-1 py-4">
             {NAV.map((item) => (
               <Link
@@ -82,9 +93,7 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
                 className={cn(
                   "rounded-md px-4 py-3 text-sm font-medium",
-                  isActive(item.href)
-                    ? "bg-papel text-petroleo"
-                    : "text-humo"
+                  isActive(item.href) ? "bg-papel text-petroleo" : "text-humo",
                 )}
               >
                 {item.label}

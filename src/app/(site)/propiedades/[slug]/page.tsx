@@ -11,14 +11,9 @@ import {
   MapPin,
   MessageCircle,
   CalendarDays,
-  ChevronRight,
-  Building2,
-  Tag,
-  KeyRound,
-  Landmark,
-  Ruler,
-  Clock,
-  ShieldCheck,
+  ArrowLeft,
+  ChevronDown,
+  ArrowUpRight,
 } from "lucide-react";
 import { getPropertyBySlug, getRelatedProperties } from "@/lib/data";
 import { PropertyGallery } from "@/components/site/PropertyGallery";
@@ -26,52 +21,41 @@ import { PropertyCard } from "@/components/site/PropertyCard";
 import { PropertyMap } from "@/components/site/PropertyMap";
 import { PropertyTracking } from "@/components/site/PropertyTracking";
 import { TrackedLink } from "@/components/site/TrackedLink";
+import { VisitBooking, BookVisitButton } from "@/components/site/VisitBooking";
 import {
-  VisitBooking,
-  BookVisitButton,
-} from "@/components/site/VisitBooking";
-import {
-  OPERATION_LABELS,
   PROPERTY_TYPE_LABELS,
-  PROPERTY_STATUS_LABELS,
   SITE,
   statusBadge,
   whatsappLink,
 } from "@/lib/constants";
 import { amenityIcon } from "@/lib/amenity-icons";
-import { formatArea, formatDate, formatPrice } from "@/lib/format";
-import {
-  propertyBreadcrumb,
-  propertyJsonLd,
-  propertyMetadata,
-} from "@/lib/seo";
+import { formatArea, formatPrice } from "@/lib/format";
+import { propertyJsonLd, propertyMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const property = await getPropertyBySlug(slug);
-  if (!property) return { title: "Propiedad no encontrada" };
-  return propertyMetadata(property);
+  const property = await getPropertyBySlug((await params).slug);
+  return property
+    ? propertyMetadata(property)
+    : { title: "Propiedad no encontrada" };
 }
-
 export default async function PropertyDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-  const property = await getPropertyBySlug(slug);
+  const property = await getPropertyBySlug((await params).slug);
   if (!property) notFound();
-
   const related = await getRelatedProperties(property);
   const images = [
-    ...(property.cover_image ? [property.cover_image] : []),
-    ...(property.images ?? []),
+    ...new Set([
+      ...(property.cover_image ? [property.cover_image] : []),
+      ...(property.images ?? []),
+    ]),
   ];
-
   const specs = [
     {
       icon: Maximize,
@@ -81,7 +65,10 @@ export default async function PropertyDetailPage({
     {
       icon: Trees,
       label: "Terreno",
-      value: property.lot_m2 ? formatArea(property.lot_m2) : null,
+      value:
+        property.property_type !== "departamento" && property.lot_m2
+          ? formatArea(property.lot_m2)
+          : null,
     },
     {
       icon: BedDouble,
@@ -95,121 +82,61 @@ export default async function PropertyDetailPage({
     },
     {
       icon: Car,
-      label: "Estacionamiento",
+      label: "Estacionamientos",
       value: property.parking ? String(property.parking) : null,
     },
   ].filter((s) => s.value);
-
-  const pricePerM2 =
-    property.operation === "venta" && property.area_m2
-      ? property.price / property.area_m2
-      : null;
-
-  const generalData = [
-    {
-      icon: Building2,
-      label: "Tipo de inmueble",
-      value: PROPERTY_TYPE_LABELS[property.property_type],
-    },
-    {
-      icon: Tag,
-      label: "Operación",
-      value: OPERATION_LABELS[property.operation],
-    },
-    {
-      icon: ShieldCheck,
-      label: "Estatus",
-      value: PROPERTY_STATUS_LABELS[property.status],
-    },
-    {
-      icon: Landmark,
-      label: "Precio",
-      value: formatPrice(property.price, property.operation),
-    },
-    ...(pricePerM2
-      ? [
-          {
-            icon: Ruler,
-            label: "Precio por m²",
-            value: formatPrice(Math.round(pricePerM2)),
-          },
-        ]
-      : []),
-    ...(property.area_m2
-      ? [
-          {
-            icon: Maximize,
-            label: "Construcción",
-            value: formatArea(property.area_m2),
-          },
-        ]
-      : []),
-    ...(property.lot_m2
-      ? [
-          {
-            icon: Trees,
-            label: "Terreno",
-            value: formatArea(property.lot_m2),
-          },
-        ]
-      : []),
-    ...(property.bedrooms
-      ? [
-          {
-            icon: BedDouble,
-            label: "Recámaras",
-            value: String(property.bedrooms),
-          },
-        ]
-      : []),
-    ...(property.bathrooms
-      ? [
-          {
-            icon: Bath,
-            label: "Baños",
-            value: String(property.bathrooms),
-          },
-        ]
-      : []),
-    ...(property.parking
-      ? [
-          {
-            icon: Car,
-            label: "Estacionamientos",
-            value: String(property.parking),
-          },
-        ]
-      : []),
-    {
-      icon: Clock,
-      label: "Publicado",
-      value: formatDate(property.created_at),
-    },
-    {
-      icon: KeyRound,
-      label: "Clave",
-      value: `LT-${property.id.slice(0, 6).toUpperCase()}`,
-    },
-  ];
-
-  const fullLocation = [
-    property.colonia,
-    property.municipio,
-    property.estado,
-  ]
+  const location = [property.colonia, property.municipio, property.estado]
     .filter(Boolean)
     .join(", ");
-
-  const waMessage = `Hola Luz, me interesa la propiedad "${property.title}" (${SITE.name}). ¿Podemos revisar disponibilidad para una visita?`;
-
-  const jsonLd = propertyJsonLd(property, images);
-  const crumbs = propertyBreadcrumb(property);
-
+  const name = `${PROPERTY_TYPE_LABELS[property.property_type]} en ${property.operation}`;
+  const amenities = [...(property.amenities ?? [])].sort(
+    (a, b) =>
+      Number(
+        /alberca|gimnasio|seguridad|terraza|jardín|patio|estacionamiento/i.test(
+          b,
+        ),
+      ) -
+      Number(
+        /alberca|gimnasio|seguridad|terraza|jardín|patio|estacionamiento/i.test(
+          a,
+        ),
+      ),
+  );
+  const waMessage = `Hola Luz, me interesa ${property.title}. ¿Me compartes disponibilidad para visitarla? https://luztorres.com/propiedades/${property.slug}`;
+  const contact = (
+    <>
+      <BookVisitButton className="btn-primary w-full py-4">
+        <CalendarDays size={18} />
+        Solicitar visita
+      </BookVisitButton>
+      <TrackedLink
+        href={whatsappLink(waMessage)}
+        event="contacto_whatsapp"
+        params={{
+          ubicacion: "ficha_propiedad",
+          property_id: property.id,
+          property_title: property.title,
+        }}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn-accent mt-3 w-full py-4"
+      >
+        <MessageCircle size={18} />
+        Consultar por WhatsApp
+      </TrackedLink>
+      <p className="mt-4 text-center text-xs leading-relaxed text-humo">
+        Elige tu fecha. Luz te confirma la disponibilidad.
+      </p>
+    </>
+  );
   return (
-    <article className="lt-container pb-28 pt-8 sm:pb-32">
+    <article className="lt-container pb-20 pt-7 sm:pt-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(propertyJsonLd(property, images)),
+        }}
       />
       <PropertyTracking
         id={property.id}
@@ -217,254 +144,179 @@ export default async function PropertyDetailPage({
         price={property.price}
         operation={property.operation}
       />
-
-      {/* Breadcrumb enriquecido: Inicio › Propiedades › {Tipo} en {op} › {Municipio} › {título} */}
-      <nav className="flex flex-wrap items-center gap-1.5 text-[13px] text-humo">
-        {crumbs.map((c, i) => (
-          <span key={c.path} className="flex items-center gap-1.5">
-            {i > 0 && <ChevronRight className="h-3.5 w-3.5" />}
-            {i < crumbs.length - 1 ? (
-              <Link href={c.path} className="hover:text-carbon">
-                {c.name}
-              </Link>
-            ) : (
-              <span className="line-clamp-1 text-carbon">{c.name}</span>
-            )}
-          </span>
-        ))}
+      <nav
+        aria-label="Ruta de navegación"
+        className="flex items-center justify-between gap-3 text-sm"
+      >
+        <Link
+          href="/propiedades"
+          className="inline-flex items-center gap-2 text-humo hover:text-petroleo"
+        >
+          <ArrowLeft size={16} />
+          Todas las propiedades
+        </Link>
+        <span className="rounded-full bg-petroleo px-3 py-1.5 text-xs font-semibold text-white">
+          {statusBadge(property.operation, property.status)}
+        </span>
       </nav>
-
-      {/* Encabezado */}
-      <header className="mt-5 flex flex-wrap items-end justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-petroleo px-3 py-1 text-[11px] font-semibold text-hueso">
-              {statusBadge(property.operation, property.status)}
-            </span>
-            <span className="rounded-full bg-almendra/15 px-3 py-1 text-[11px] font-semibold text-nogal">
-              {PROPERTY_TYPE_LABELS[property.property_type]}
-            </span>
-          </div>
-          <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
-            {property.title}
-          </h1>
-          <p className="mt-2 flex items-center gap-1.5 text-[15px] text-humo">
-            <MapPin className="h-4 w-4 shrink-0 text-bruma" />
-            {fullLocation}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="font-mono text-3xl font-medium tabular-nums text-petroleo">
-            {formatPrice(property.price, property.operation)}
-          </p>
-          {pricePerM2 && (
-            <p className="mt-0.5 font-mono text-[13px] text-humo">
-              {formatPrice(Math.round(pricePerM2))} por m²
-            </p>
-          )}
-        </div>
+      <header className="mb-7 mt-7">
+        <p className="eyebrow">{name}</p>
+        <h1 className="mt-3 text-3xl font-medium leading-tight tracking-[-.03em] sm:text-4xl lg:text-[44px]">
+          {property.colonia || property.title}
+        </h1>
+        <p className="mt-3 flex items-center gap-2 text-sm text-humo">
+          <MapPin size={16} className="shrink-0 text-almendra" />
+          {property.municipio}, {property.estado}
+        </p>
+        <p className="mt-4 text-2xl font-semibold tracking-tight text-petroleo lg:hidden">
+          {formatPrice(property.price, property.operation)}
+        </p>
       </header>
-
-      {/* Galería */}
-      <div className="mt-6">
-        <PropertyGallery
-          images={images}
-          type={property.property_type}
-          title={property.title}
-        />
-      </div>
-
-      {/* Contenido */}
-      <div className="mt-8 grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          {/* Ficha técnica rápida */}
-          {specs.length > 0 && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {specs.map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-md bg-papel p-4 text-center shadow-soft"
-                >
-                  <s.icon className="mx-auto h-5 w-5 text-nogal" />
-                  <p className="mt-2 font-mono text-lg font-medium text-carbon">
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_330px]">
+        <div className="min-w-0">
+          <PropertyGallery
+            images={images}
+            type={property.property_type}
+            title={property.title}
+          />
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {specs.map((s) => (
+              <div
+                key={s.label}
+                className="flex items-center gap-3 rounded-lg bg-white px-4 py-5 shadow-soft"
+              >
+                <s.icon
+                  size={22}
+                  strokeWidth={1.5}
+                  className="shrink-0 text-nogal"
+                />
+                <div>
+                  <p className="text-lg font-semibold tabular-nums">
                     {s.value}
                   </p>
-                  <p className="text-[12px] text-humo">{s.label}</p>
+                  <p className="text-xs text-humo">{s.label}</p>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Descripción */}
-          {property.description && (
+              </div>
+            ))}
+          </div>
+          <div className="mt-7 rounded-xl bg-white p-6 shadow-card lg:hidden">
+            {contact}
+          </div>
+          {amenities.length > 0 && (
             <section className="mt-10">
-              <p className="eyebrow">Descripción</p>
-              <h2 className="mt-1 text-xl font-semibold text-carbon">
-                Sobre esta propiedad
+              <h2 className="text-xl font-semibold">
+                Lo que hace especial este espacio
               </h2>
-              <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-humo">
-                {property.description}
-              </p>
-            </section>
-          )}
-
-          {/* Amenidades con iconos */}
-          {property.amenities && property.amenities.length > 0 && (
-            <section className="mt-10">
-              <p className="eyebrow">Amenidades</p>
-              <h2 className="mt-1 text-xl font-semibold text-carbon">
-                Lo que esta propiedad ofrece
-              </h2>
-              <ul className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                {property.amenities.map((a) => {
+              <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+                {amenities.slice(0, 6).map((a) => {
                   const Icon = amenityIcon(a);
                   return (
                     <li
                       key={a}
-                      className="flex items-center gap-3 rounded-md bg-papel px-4 py-3 text-sm text-carbon shadow-soft"
+                      className="flex items-center gap-3 rounded-md bg-[#f5f7f6] p-4 text-sm"
                     >
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-almendra/15">
-                        <Icon className="h-4 w-4 text-nogal" />
-                      </span>
+                      <Icon size={19} className="shrink-0 text-petroleo" />
                       {a}
                     </li>
                   );
                 })}
               </ul>
+              {amenities.length > 6 && (
+                <details className="mt-4 rounded-lg bg-white p-5 shadow-soft">
+                  <summary className="flex items-center justify-between gap-3 text-sm font-semibold text-nogal">
+                    Ver las {amenities.length} características
+                    <ChevronDown size={18} className="details-chevron" />
+                  </summary>
+                  <ul className="mt-5 grid gap-3 text-sm text-humo sm:grid-cols-2">
+                    {amenities.slice(6).map((a) => (
+                      <li key={a}>{a}</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </section>
           )}
-
-          {/* Datos generales */}
-          <section className="mt-10">
-            <p className="eyebrow">Ficha técnica</p>
-            <h2 className="mt-1 text-xl font-semibold text-carbon">
-              Datos generales
-            </h2>
-            <dl className="mt-4 overflow-hidden rounded-xl bg-papel shadow-soft">
-              {generalData.map((d, i) => (
-                <div
-                  key={d.label}
-                  className={`flex items-center justify-between gap-4 px-5 py-3 ${
-                    i % 2 === 1 ? "bg-nieve/70" : ""
-                  }`}
-                >
-                  <dt className="flex items-center gap-2.5 text-sm text-humo">
-                    <d.icon className="h-4 w-4 shrink-0 text-bruma" />
-                    {d.label}
-                  </dt>
-                  <dd className="text-right text-sm font-medium text-carbon">
-                    {d.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-
-          {/* Ubicación con mapa */}
-          <section className="mt-10">
-            <p className="eyebrow">Ubicación</p>
-            <h2 className="mt-1 text-xl font-semibold text-carbon">
-              ¿Dónde se encuentra?
-            </h2>
-            <p className="mt-2 flex items-center gap-1.5 text-sm text-humo">
-              <MapPin className="h-4 w-4 shrink-0 text-bruma" />
-              {fullLocation}
-            </p>
-            <div className="mt-4">
-              <PropertyMap property={property} />
+          {property.description && (
+            <details className="mt-6 rounded-xl bg-white p-6 shadow-soft">
+              <summary className="flex items-center justify-between gap-3 text-lg font-semibold">
+                Descripción y detalles
+                <ChevronDown size={20} className="details-chevron text-nogal" />
+              </summary>
+              <p className="mt-5 whitespace-pre-line text-base leading-relaxed text-humo">
+                {property.description}
+              </p>
+            </details>
+          )}
+          <section className="mt-8">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">Explora la zona</h2>
+                <p className="mt-2 text-sm text-humo">{location}</p>
+              </div>
+              <MapPin size={24} className="shrink-0 text-almendra" />
             </div>
-            <p className="mt-3 text-[13px] text-humo">
-              El mapa muestra la zona de la propiedad. Comparto la dirección
-              exacta al confirmar tu visita.
+            <PropertyMap property={property} />
+            <p className="mt-3 text-xs text-humo">
+              Ubicación aproximada. Dirección exacta al confirmar tu visita.
             </p>
           </section>
         </div>
-
-        {/* Tarjeta lateral */}
-        <aside className="lg:col-span-1">
-          <div className="sticky top-24 space-y-4">
-            <div className="rounded-xl bg-papel p-5 shadow-card">
-              <p className="eyebrow">
-                {statusBadge(property.operation, property.status)}
-              </p>
-              <p className="mt-1 font-mono text-2xl font-medium text-petroleo">
-                {formatPrice(property.price, property.operation)}
-              </p>
-
-              <BookVisitButton className="btn-primary mt-4 w-full py-3">
-                <CalendarDays className="h-4 w-4" />
-                Solicitar una visita
-              </BookVisitButton>
-              <p className="mt-2 text-center text-[12px] text-humo">
-                Indica tu fecha preferida. Confirmamos disponibilidad contigo.
-              </p>
-
-              <div className="my-4 flex items-center gap-3">
-                <span className="h-px flex-1 bg-lino" />
-                <span className="text-[11px] font-medium uppercase tracking-wide text-humo">
-                  o
-                </span>
-                <span className="h-px flex-1 bg-lino" />
-              </div>
-
-              <TrackedLink
-                href={whatsappLink(waMessage)}
-                event="contacto_whatsapp"
-                params={{
-                  ubicacion: "ficha_propiedad",
-                  property_id: property.id,
-                  property_title: property.title,
-                }}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-whatsapp w-full py-3"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Preguntar por WhatsApp
-              </TrackedLink>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-xl bg-papel p-4 shadow-soft">
+        <aside className="sticky top-28 hidden lg:block">
+          <div className="rounded-xl bg-white p-7 shadow-elevated">
+            <p className="eyebrow">Precio de {property.operation}</p>
+            <p className="mt-3 text-[29px] font-semibold tracking-tight tabular-nums text-petroleo">
+              {formatPrice(property.price, property.operation)}
+            </p>
+            <p className="mt-2 text-sm text-humo">
+              {property.colonia || property.municipio}
+            </p>
+            <div className="mt-7">{contact}</div>
+            <div className="mt-7 flex items-center gap-3 rounded-lg bg-[#f5f7f6] p-4">
               <Image
                 src="/luz-keys.jpg"
                 alt="Luz Torres"
-                width={52}
-                height={52}
-                className="h-[52px] w-[52px] rounded-full object-cover"
+                width={48}
+                height={48}
+                className="h-12 w-12 rounded-full object-cover object-top"
               />
               <div>
-                <p className="text-sm font-semibold text-carbon">
-                  {SITE.name}
-                </p>
-                <p className="text-[12px] text-humo">{SITE.role}</p>
-                <p className="mt-0.5 text-[12px] text-humo">
-                  Te acompaño personalmente en cada visita.
+                <p className="text-sm font-semibold">{SITE.name}</p>
+                <p className="mt-1 text-xs text-humo">
+                  Tu asesora inmobiliaria
                 </p>
               </div>
             </div>
           </div>
+          <p className="mt-4 text-center text-xs text-humo">
+            Información y disponibilidad sujetas a actualización.
+          </p>
         </aside>
       </div>
-
-      {/* Propiedades similares */}
       {related.length > 0 && (
-        <section className="mt-16">
-          <h2 className="text-hero">Propiedades similares</h2>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-20">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2 className="text-3xl font-medium">Más espacios para ti</h2>
+            <Link
+              href="/propiedades"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-nogal"
+            >
+              Explorar
+              <ArrowUpRight size={18} />
+            </Link>
+          </div>
+          <div className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((p, i) => (
               <PropertyCard key={p.id} property={p} index={i} />
             ))}
           </div>
         </section>
       )}
-
-      {/* Botón fijo + modal de reserva */}
       <VisitBooking
         propertyId={property.id}
         propertyTitle={property.title}
         operation={property.operation}
         price={property.price}
-        location={fullLocation}
+        location={location}
       />
     </article>
   );

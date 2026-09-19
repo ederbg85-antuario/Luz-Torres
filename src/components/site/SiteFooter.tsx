@@ -21,15 +21,14 @@ const NAV_LINKS = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-24 bg-sombra text-hueso">
+    <footer className="mx-3 mb-3 mt-20 rounded-2xl bg-sombra text-white shadow-elevated sm:mx-6 sm:mb-6">
       <div className="lt-container py-16">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Marca */}
           <div className="lg:pr-6">
             <Logo className="h-8 text-hueso" />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-bruma">
-              Asesoría inmobiliaria integral en México. Compra, venta y renta
-              con un proceso ordenado de principio a fin.
+              Compra, venta y renta. Contigo en cada paso.
             </p>
             <p className="mt-5 font-serif text-lg italic text-almendra-claro">
               “{SITE.tagline}”
@@ -119,7 +118,7 @@ export function SiteFooter() {
         </div>
 
         {/* Alianza */}
-        <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-white/10 pt-8 text-sm text-bruma">
+        <div className="mt-9 flex flex-wrap items-center gap-3 text-sm text-bruma">
           <span>En alianza con</span>
           <span className="rounded-md bg-hueso px-2.5 py-1.5 font-semibold text-sombra">
             {SITE.partner}
@@ -128,7 +127,7 @@ export function SiteFooter() {
       </div>
 
       {/* Barra inferior */}
-      <div className="border-t border-white/10">
+      <div>
         <div className="lt-container flex flex-col items-center justify-between gap-3 py-6 text-xs text-bruma sm:flex-row">
           <p>
             © {new Date().getFullYear()} {SITE.name} · {SITE.role}. Todos los

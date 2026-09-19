@@ -1,16 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { X, ChevronLeft, ChevronRight, Images } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Images, Expand } from "lucide-react";
 import type { PropertyType } from "@/lib/types";
 import { cn } from "@/lib/format";
 import { PropertyImage } from "./PropertyImage";
 
-/**
- * Galería de la ficha — grid de portada contenido (no una imagen gigante)
- * con acceso a un visor a pantalla completa que muestra todas las fotos.
- */
 export function PropertyGallery({
   images,
   type,
@@ -20,175 +16,253 @@ export function PropertyGallery({
   type: PropertyType;
   title: string;
 }) {
-  const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-
-  const openAt = useCallback((i: number) => {
-    setActive(i);
+  const [open, setOpen] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const touchX = useRef<number | null>(null);
+  const count = images.length;
+  const move = (direction: number) =>
+    setActive((i) => (i + direction + count) % count);
+  const show = (index: number) => {
+    setActive(index);
     setOpen(true);
-  }, []);
-
-  const close = useCallback(() => setOpen(false), []);
-  const prev = useCallback(
-    () => setActive((i) => (i - 1 + images.length) % images.length),
-    [images.length]
-  );
-  const next = useCallback(
-    () => setActive((i) => (i + 1) % images.length),
-    [images.length]
-  );
-
+  };
   useEffect(() => {
-    if (!open) return;
+    const el = dialog.current;
+    if (!el || !open) return;
+    el.showModal();
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
-    }
-    window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKey);
+      el.close();
+      document.body.style.overflow = previousOverflow;
     };
-  }, [open, close, prev, next]);
+  }, [open]);
+  useEffect(() => {
+    if (open)
+      dialog.current
+        ?.querySelector<HTMLElement>('[aria-current="true"]')
+        ?.scrollIntoView({
+          block: "nearest",
+          inline: "center",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "instant"
+            : "smooth",
+        });
+  }, [active, open]);
 
-  if (!images || images.length === 0) {
+  if (!count)
     return (
-      <div className="relative aspect-[16/9] overflow-hidden rounded-xl shadow-card sm:aspect-[21/9]">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[#f5f6f5] shadow-card">
         <PropertyImage src={null} type={type} alt={title} priority />
       </div>
     );
-  }
-
-  const rest = images.slice(1, 5);
 
   return (
     <>
-      <div className="relative grid grid-cols-4 grid-rows-2 gap-1.5 overflow-hidden rounded-xl shadow-card sm:h-[420px] lg:h-[460px]">
-        <button
-          type="button"
-          onClick={() => openAt(0)}
-          className="group relative col-span-4 row-span-2 h-64 overflow-hidden sm:col-span-2 sm:h-full"
+      <div className="grid gap-3">
+        <div
+          className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-[#f4f5f4] shadow-card sm:aspect-[16/10]"
+          onTouchStart={(e) => {
+            touchX.current = e.touches[0].clientX;
+          }}
+          onTouchEnd={(e) => {
+            if (touchX.current !== null) {
+              const difference = touchX.current - e.changedTouches[0].clientX;
+              if (Math.abs(difference) > 45) move(difference > 0 ? 1 : -1);
+            }
+            touchX.current = null;
+          }}
         >
-          <Image
-            src={images[0]}
-            alt={title}
-            fill
-            priority
-            sizes="(max-width: 640px) 100vw, 50vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        </button>
-
-        {rest.map((img, i) => (
           <button
-            key={img}
             type="button"
-            onClick={() => openAt(i + 1)}
-            className="group relative hidden overflow-hidden sm:block"
+            onClick={() => show(active)}
+            aria-label={`Ampliar foto ${active + 1} de ${count}`}
+            className="absolute inset-0"
           >
             <Image
-              src={img}
-              alt={`${title} — foto ${i + 2}`}
+              key={images[active]}
+              src={images[active]}
+              alt={`${title} — foto ${active + 1}`}
               fill
-              sizes="25vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              priority={active === 0}
+              sizes="(max-width: 1024px) 100vw, 65vw"
+              className="object-cover animate-fade-in transition-transform duration-700 group-hover:scale-[1.025]"
             />
           </button>
-        ))}
-
-        {/* Placeholders para completar el grid 2x2 cuando hay pocas fotos */}
-        {rest.length < 4 &&
-          Array.from({ length: 4 - rest.length }).map((_, i) => (
-            <div
-              key={`ph-${i}`}
-              className="hidden bg-lino sm:block"
-              aria-hidden
-            />
+          <span
+            className="pointer-events-none absolute left-4 top-4 rounded-full bg-white/95 px-3 py-2 text-xs font-semibold text-petroleo shadow-soft"
+            aria-live="polite"
+          >
+            {active + 1} / {count}
+          </span>
+          {count > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => move(-1)}
+                aria-label="Foto anterior"
+                className="absolute left-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-petroleo shadow-card"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={() => move(1)}
+                aria-label="Foto siguiente"
+                className="absolute right-4 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-petroleo shadow-card"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => show(active)}
+            className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2.5 text-sm font-semibold text-petroleo shadow-card"
+          >
+            <Images size={16} />
+            Ver {count} fotos
+            <Expand size={14} />
+          </button>
+        </div>
+        <div className="no-scrollbar flex gap-3 overflow-x-auto px-1 pb-3 pt-1">
+          {images.slice(0, 6).map((src, i) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => (i === 5 && count > 6 ? show(6) : setActive(i))}
+              aria-label={
+                i === 5 && count > 6
+                  ? "Ver todas las fotos"
+                  : `Ver foto ${i + 1}`
+              }
+              aria-pressed={active === i}
+              className={cn(
+                "relative h-20 min-w-0 flex-1 shrink-0 basis-24 overflow-hidden rounded-md transition-all hover:-translate-y-1",
+                active === i
+                  ? "shadow-card opacity-100"
+                  : "opacity-70 hover:opacity-100",
+              )}
+            >
+              <Image
+                src={src}
+                alt={`${title} — miniatura ${i + 1}`}
+                fill
+                sizes="120px"
+                className="object-cover"
+              />
+              {i === 5 && count > 6 && (
+                <span className="absolute inset-0 grid place-items-center bg-petroleo/75 text-sm font-semibold text-white">
+                  +{count - 6}
+                </span>
+              )}
+            </button>
           ))}
-
-        <button
-          type="button"
-          onClick={() => openAt(0)}
-          className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-2 rounded-full bg-papel/95 px-4 py-2.5 text-[13px] font-semibold text-carbon shadow-card backdrop-blur-sm transition-transform hover:scale-105"
-        >
-          <Images className="h-4 w-4 text-nogal" />
-          Ver las {images.length} fotos
-        </button>
+        </div>
       </div>
-
       {open && (
-        <div
-          className="fixed inset-0 z-[100] flex flex-col backdrop-blur-sm animate-fade-in"
-          style={{ backgroundColor: "rgba(20, 14, 10, 0.97)" }}
+        <dialog
+          ref={dialog}
+          className="property-gallery-dialog"
+          aria-label={`Fotos: ${title}`}
+          onCancel={() => setOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              move(-1);
+            }
+            if (e.key === "ArrowRight") {
+              e.preventDefault();
+              move(1);
+            }
+          }}
         >
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
-            <p className="text-sm font-medium text-hueso/80">
-              {active + 1} / {images.length}
-            </p>
+          <div className="flex items-center justify-between gap-4 p-4 sm:px-8">
+            <div className="min-w-0">
+              <p className="truncate text-sm text-white/70">{title}</p>
+              <p className="mt-1 text-sm font-semibold" aria-live="polite">
+                Foto {active + 1} de {count}
+              </p>
+            </div>
             <button
               type="button"
-              onClick={close}
+              onClick={() => setOpen(false)}
               aria-label="Cerrar galería"
-              className="grid h-10 w-10 place-items-center rounded-full bg-hueso/10 text-hueso transition-colors hover:bg-hueso/20"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/15 text-white"
             >
-              <X className="h-5 w-5" />
+              <X size={22} />
             </button>
           </div>
-
-          <div className="relative flex-1 px-2 pb-2 sm:px-6 sm:pb-6">
-            <div className="relative h-full w-full overflow-hidden rounded-lg">
-              <Image
-                src={images[active]}
-                alt={`${title} — foto ${active + 1}`}
-                fill
-                sizes="100vw"
-                className="object-contain"
-                priority
-              />
-            </div>
-
-            {images.length > 1 && (
+          <div
+            className="relative min-h-0 flex-1"
+            onTouchStart={(e) => {
+              touchX.current = e.touches[0].clientX;
+            }}
+            onTouchEnd={(e) => {
+              if (touchX.current !== null) {
+                const dx = touchX.current - e.changedTouches[0].clientX;
+                if (Math.abs(dx) > 45) move(dx > 0 ? 1 : -1);
+              }
+              touchX.current = null;
+            }}
+          >
+            <Image
+              src={images[active]}
+              alt={`${title} — foto ${active + 1}`}
+              fill
+              sizes="100vw"
+              className="object-contain"
+              priority
+            />
+            {count > 1 && (
               <>
                 <button
                   type="button"
-                  onClick={prev}
+                  onClick={() => move(-1)}
                   aria-label="Foto anterior"
-                  className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-hueso/10 text-hueso transition-colors hover:bg-hueso/25 sm:left-8"
+                  className="absolute left-3 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-petroleo shadow-card sm:left-8"
                 >
-                  <ChevronLeft className="h-6 w-6" />
+                  <ChevronLeft size={24} />
                 </button>
                 <button
                   type="button"
-                  onClick={next}
+                  onClick={() => move(1)}
                   aria-label="Foto siguiente"
-                  className="absolute right-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-hueso/10 text-hueso transition-colors hover:bg-hueso/25 sm:right-8"
+                  className="absolute right-3 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-petroleo shadow-card sm:right-8"
                 >
-                  <ChevronRight className="h-6 w-6" />
+                  <ChevronRight size={24} />
                 </button>
               </>
             )}
           </div>
-
-          <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-4 sm:px-6">
-            {images.map((img, i) => (
+          <div className="no-scrollbar flex shrink-0 gap-3 overflow-x-auto p-4 sm:p-6">
+            {images.map((src, i) => (
               <button
-                key={img}
+                key={src}
                 type="button"
+                aria-label={`Ir a foto ${i + 1}`}
+                aria-current={i === active ? "true" : undefined}
                 onClick={() => setActive(i)}
                 className={cn(
-                  "relative h-16 w-20 shrink-0 overflow-hidden rounded-md transition-opacity",
+                  "relative h-16 w-20 shrink-0 overflow-hidden rounded-sm transition-opacity",
                   i === active
-                    ? "ring-2 ring-almendra-claro"
-                    : "opacity-50 hover:opacity-90"
+                    ? "opacity-100 shadow-elevated"
+                    : "opacity-45 hover:opacity-100",
                 )}
               >
-                <Image src={img} alt="" fill sizes="80px" className="object-cover" />
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
               </button>
             ))}
           </div>
-        </div>
+        </dialog>
       )}
     </>
   );

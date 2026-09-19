@@ -5,13 +5,7 @@ import { PROPERTY_TYPE_LABELS, statusBadge } from "@/lib/constants";
 import { cn, formatArea, formatPrice } from "@/lib/format";
 import { PropertyImage } from "./PropertyImage";
 
-function Spec({
-  icon: Icon,
-  value,
-}: {
-  icon: typeof Maximize;
-  value: string;
-}) {
+function Spec({ icon: Icon, value }: { icon: typeof Maximize; value: string }) {
   return (
     <span className="flex items-center gap-1.5">
       <Icon className="h-4 w-4 text-almendra" strokeWidth={1.75} />
@@ -65,26 +59,25 @@ export function PropertyCard({
       </div>
 
       <div className="p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-eyebrow text-almendra">
+        <p className="text-xs font-semibold uppercase tracking-wider text-nogal">
           {PROPERTY_TYPE_LABELS[property.property_type]}
         </p>
         <p
           className={cn(
-            "mt-1.5 font-mono text-xl font-medium tabular-nums text-carbon",
-            sold && "text-humo line-through decoration-1"
+            "mt-2 text-2xl font-semibold tracking-tight tabular-nums text-petroleo",
+            sold && "text-humo line-through decoration-1",
           )}
         >
           {formatPrice(property.price, property.operation)}
         </p>
         <h3 className="mt-1.5 line-clamp-2 text-[15px] font-semibold leading-snug text-carbon">
-          {property.title}
+          {property.colonia || property.municipio}
         </h3>
         <p className="mt-1 text-sm text-humo">
-          {property.colonia ? `${property.colonia} · ` : ""}
           {property.municipio}, {property.estado}
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-lino pt-3.5 text-[13px] text-humo">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md bg-[#f6f7f6] p-3 text-[13px] text-humo">
           {area > 0 && <Spec icon={Maximize} value={formatArea(area)} />}
           {(property.bedrooms ?? 0) > 0 && (
             <Spec icon={BedDouble} value={`${property.bedrooms} rec`} />
