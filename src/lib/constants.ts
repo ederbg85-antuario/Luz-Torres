@@ -187,6 +187,7 @@ export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
 };
 
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
+  solicitud: "Solicitud pendiente",
   programada: "Programada",
   completada: "Completada",
   cancelada: "Cancelada",

@@ -38,6 +38,7 @@ export const propertyStatusTone: Record<PropertyStatus, Tone> = {
 };
 
 export const appointmentStatusTone: Record<AppointmentStatus, Tone> = {
+  solicitud: "amber",
   programada: "vivo",
   completada: "green",
   cancelada: "rose",

@@ -198,7 +198,8 @@ export function AgendaView({
                       }
                       className={cn(
                         "block w-full truncate rounded px-1.5 py-0.5 text-left text-[11px] font-medium",
-                        TYPE_STYLE[a.type]
+                        TYPE_STYLE[a.type],
+                        a.status === "solicitud" && "ring-1 ring-vivo/60"
                       )}
                     >
                       {new Date(a.starts_at).toLocaleTimeString("es-MX", {
@@ -245,7 +246,7 @@ export function AgendaView({
                       {a.title}
                     </span>
                     <span className="block text-[12px] text-humo">
-                      {APPOINTMENT_TYPE_LABELS[a.type]} ·{" "}
+                      {APPOINTMENT_STATUS_LABELS[a.status]} · {APPOINTMENT_TYPE_LABELS[a.type]} ·{" "}
                       {formatDateTime(a.starts_at)}
                       {a.contact ? ` · ${a.contact.full_name}` : ""}
                     </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { pushEvent } from "@/lib/gtm";
+import { trackMetaEvent } from "@/lib/meta";
 
 /**
  * Enlace normal que además dispara un evento al dataLayer al hacer
@@ -32,7 +33,15 @@ export function TrackedLink({
       rel={rel}
       aria-label={ariaLabel}
       className={className}
-      onClick={() => pushEvent(event, params)}
+      onClick={() => {
+        pushEvent(event, params);
+        if (event.startsWith("contacto_")) {
+          trackMetaEvent("Contact", {
+            content_name: event.replace("contacto_", ""),
+            ...params,
+          });
+        }
+      }}
     >
       {children}
     </a>

@@ -23,7 +23,7 @@ export default async function AgendaPage() {
     <>
       <PageHeader
         title="Agenda"
-        description="Organiza visitas, firmas y citas. Las visitas agendadas desde la web aparecen aquí automáticamente."
+        description="Organiza visitas, firmas y citas. Las solicitudes web llegan aquí pendientes de confirmación."
       />
       <AgendaView
         appointments={appointments}
@@ -36,8 +36,8 @@ export default async function AgendaPage() {
           Disponibilidad para visitas
         </h2>
         <p className="mt-1 text-sm text-humo">
-          Controla qué días y horas pueden reservar los clientes desde la
-          ficha de cada propiedad.
+          Controla horarios de referencia para tu equipo. Las solicitudes del
+          sitio no bloquean horarios ni quedan confirmadas automáticamente.
         </p>
         <div className="mt-4">
           <AvailabilityManager rules={rules} blocked={blocked} />

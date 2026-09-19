@@ -70,7 +70,7 @@ export function SearchBar() {
               difusión profesional y el filtrado de prospectos.
             </p>
             <Link
-              href="/contacto?intent=venta"
+              href="/vende-tu-propiedad"
               className="btn-accent shrink-0 px-5 py-3"
             >
               Solicitar valuación

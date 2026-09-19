@@ -30,7 +30,7 @@ export function CtaSection() {
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <TrackedLink
                 href={whatsappLink(
-                  "Hola Luz, me gustaría agendar una asesoría inmobiliaria."
+                  "Hola Luz, me gustaría solicitar una asesoría inmobiliaria."
                 )}
                 event="contacto_whatsapp"
                 params={{ ubicacion: "cta_home" }}

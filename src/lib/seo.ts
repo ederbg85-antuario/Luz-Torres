@@ -301,7 +301,7 @@ export function resolveCategory(
   const intro =
     level === "operation"
       ? `Explora todas las propiedades en ${op(operation)} con Luz Torres: casas, departamentos, oficinas, bodegas y terrenos con ficha técnica completa, ubicación y acompañamiento de principio a fin.`
-      : `Encuentra ${tipoTxt} en ${operation} en ${lugar} con asesoría inmobiliaria integral. Cada propiedad incluye ficha técnica, fotos, ubicación y la posibilidad de agendar una visita guiada con Luz Torres, sin compromiso.`;
+      : `Encuentra ${tipoTxt} en ${operation} en ${lugar} con asesoría inmobiliaria integral. Cada propiedad incluye ficha técnica, fotos, ubicación y la posibilidad de solicitar una visita guiada con Luz Torres, sin compromiso.`;
 
   return { ...base, heading, path, intro };
 }

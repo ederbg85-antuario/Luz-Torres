@@ -36,7 +36,7 @@ export function PropertyCard({
       className="group relative block h-full overflow-hidden rounded-xl bg-papel shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-elevated"
     >
       <div className="relative aspect-[16/10] overflow-hidden">
-        <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.06]">
+        <div className="relative h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.06]">
           <PropertyImage
             src={property.cover_image}
             type={property.property_type}

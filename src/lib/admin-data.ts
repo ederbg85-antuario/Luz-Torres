@@ -227,7 +227,7 @@ export async function getDashboardData() {
           .from("appointments")
           .select("*, contact:contacts(full_name), property:properties(title)")
           .gte("starts_at", nowIso)
-          .eq("status", "programada")
+          .in("status", ["solicitud", "programada"])
           .order("starts_at", { ascending: true })
           .limit(5),
         supabase

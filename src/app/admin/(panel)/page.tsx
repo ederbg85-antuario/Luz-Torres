@@ -50,10 +50,10 @@ export default async function DashboardPage() {
           hint={`${data.contacts.total} contactos en el CRM`}
         />
         <StatCard
-          label="Citas próximas"
+          label="Visitas por confirmar"
           value={data.upcoming.length}
           icon={CalendarDays}
-          hint="Programadas a futuro"
+          hint="Solicitudes y citas futuras"
         />
         <StatCard
           label="Tareas pendientes"
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
         {/* Próximas citas */}
         <section className="rounded-xl bg-papel p-5 shadow-soft">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-carbon">Próximas citas</h2>
+            <h2 className="font-semibold text-carbon">Visitas y solicitudes</h2>
             <Link
               href="/admin/agenda"
               className="text-[13px] font-medium text-vivo hover:underline"
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
             </ul>
           ) : (
             <p className="mt-4 text-sm text-humo">
-              No tienes citas programadas.
+              No tienes visitas o solicitudes próximas.
             </p>
           )}
         </section>

@@ -107,7 +107,8 @@ export function AvailabilityManager({
       <div className="rounded-xl bg-papel p-5 shadow-soft">
         <h2 className="font-semibold text-carbon">Horario para visitas</h2>
         <p className="mt-1 text-[13px] text-humo">
-          Los clientes solo podrán agendar visitas dentro de estos horarios.
+          Úsalos como referencia al confirmar solicitudes de visita con los
+          propietarios.
           Cada visita dura 1 hora.
         </p>
 

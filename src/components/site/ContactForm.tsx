@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/contact";
 import { CONTACT_INTEREST_LABELS } from "@/lib/constants";
 import { pushEvent } from "@/lib/gtm";
+import { trackMetaEvent } from "@/lib/meta";
 import type { ContactInterest } from "@/lib/types";
 
 const INITIAL: ContactFormState = { status: "idle", message: "" };
@@ -33,7 +34,16 @@ export function ContactForm({
       pushEvent("generate_lead", {
         interest: defaultInterest,
         property_id: propertyId,
+        event_id: state.eventId,
       });
+      trackMetaEvent(
+        "Lead",
+        {
+          content_name: `Contacto web · ${defaultInterest}`,
+          ...(propertyId ? { content_ids: [propertyId], content_type: "product" } : {}),
+        },
+        state.eventId
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.status]);
@@ -83,6 +93,7 @@ export function ContactForm({
           <span className="label">Teléfono / WhatsApp</span>
           <input
             name="phone"
+            required
             className="field"
             placeholder="55 0000 0000"
           />
@@ -91,9 +102,10 @@ export function ContactForm({
 
       <label className="block">
         <span className="label">Correo electrónico</span>
-        <input
-          name="email"
-          type="email"
+          <input
+            name="email"
+            type="email"
+            required
           className="field"
           placeholder="tu@correo.com"
         />

@@ -10,6 +10,10 @@ import type {
   FinancingMethod,
   TakenSlot,
 } from "@/lib/types";
+import {
+  createMetaEventId,
+  sendMetaServerEvent,
+} from "@/lib/meta-conversions";
 
 // ─── Disponibilidad pública ─────────────────────────────────────
 
@@ -53,11 +57,12 @@ export async function fetchVisitAvailability(
   }
 }
 
-// ─── Reservar visita ────────────────────────────────────────────
+// ─── Solicitar visita ───────────────────────────────────────────
 
-export type BookVisitInput = {
+export type VisitRequestInput = {
   property_id: string;
-  starts_at: string; // ISO
+  preferred_date: string; // YYYY-MM-DD
+  preferred_time: string; // HH:mm
   full_name: string;
   phone: string;
   email: string;
@@ -67,38 +72,36 @@ export type BookVisitInput = {
   company?: string;
 };
 
-export type BookVisitResult = { ok: boolean; error?: string };
+export type VisitRequestResult = { ok: boolean; error?: string; eventId?: string };
 
-export async function bookVisit(
-  input: BookVisitInput
-): Promise<BookVisitResult> {
+export async function requestVisit(
+  input: VisitRequestInput
+): Promise<VisitRequestResult> {
   if (input.company) return { ok: true };
 
-  if (!input.full_name.trim()) {
-    return { ok: false, error: "Falta tu nombre completo." };
-  }
-  if (!input.phone.trim() && !input.email.trim()) {
+  if (!input.full_name.trim() || !input.phone.trim() || !input.email.trim()) {
     return {
       ok: false,
-      error: "Deja un teléfono o un correo para confirmarte la visita.",
+      error: "Completa nombre, teléfono y correo para enviar la solicitud.",
     };
   }
-  if (!input.starts_at) {
-    return { ok: false, error: "Elige fecha y hora para tu visita." };
+  if (!input.preferred_date || !input.preferred_time) {
+    return { ok: false, error: "Elige la fecha y hora que prefieres." };
   }
   if (!isSupabaseConfigured()) {
     return {
       ok: false,
       error:
-        "El sistema de reservas aún no está conectado. Escríbeme por WhatsApp.",
+        "El sistema de solicitudes aún no está conectado. Escríbeme por WhatsApp.",
     };
   }
 
   try {
     const supabase = createSupabasePublicClient();
-    const { data, error } = await supabase.rpc("book_visit", {
+    const { data, error } = await supabase.rpc("request_visit", {
       p_property_id: input.property_id,
-      p_starts_at: new Date(input.starts_at).toISOString(),
+      p_preferred_date: input.preferred_date,
+      p_preferred_time: input.preferred_time,
       p_full_name: input.full_name.trim(),
       p_phone: input.phone.trim() || null,
       p_email: input.email.trim() || null,
@@ -110,15 +113,24 @@ export async function bookVisit(
     if (!result?.ok) {
       return {
         ok: false,
-        error: result?.error ?? "No se pudo agendar la visita.",
+        error: result?.error ?? "No se pudo registrar la solicitud.",
       };
     }
-    return { ok: true };
+    const eventId = createMetaEventId();
+    await sendMetaServerEvent({
+      eventName: "Schedule",
+      eventId,
+      email: input.email.trim(),
+      phone: input.phone.trim(),
+      contentName: "Solicitud de visita",
+      contentIds: [input.property_id],
+    });
+    return { ok: true, eventId };
   } catch {
     return {
       ok: false,
       error:
-        "No pude agendar tu visita. Intenta de nuevo o escríbeme por WhatsApp.",
+        "No pude enviar tu solicitud. Intenta de nuevo o escríbeme por WhatsApp.",
     };
   }
 }

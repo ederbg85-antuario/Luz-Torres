@@ -24,6 +24,7 @@ import { getPropertyBySlug, getRelatedProperties } from "@/lib/data";
 import { PropertyGallery } from "@/components/site/PropertyGallery";
 import { PropertyCard } from "@/components/site/PropertyCard";
 import { PropertyMap } from "@/components/site/PropertyMap";
+import { PropertyTracking } from "@/components/site/PropertyTracking";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import {
   VisitBooking,
@@ -199,7 +200,7 @@ export default async function PropertyDetailPage({
     .filter(Boolean)
     .join(", ");
 
-  const waMessage = `Hola Luz, me interesa la propiedad "${property.title}" (${SITE.name}). ¿Podemos agendar una visita?`;
+  const waMessage = `Hola Luz, me interesa la propiedad "${property.title}" (${SITE.name}). ¿Podemos revisar disponibilidad para una visita?`;
 
   const jsonLd = propertyJsonLd(property, images);
   const crumbs = propertyBreadcrumb(property);
@@ -209,6 +210,12 @@ export default async function PropertyDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PropertyTracking
+        id={property.id}
+        title={property.title}
+        price={property.price}
+        operation={property.operation}
       />
 
       {/* Breadcrumb enriquecido: Inicio › Propiedades › {Tipo} en {op} › {Municipio} › {título} */}
@@ -386,10 +393,10 @@ export default async function PropertyDetailPage({
 
               <BookVisitButton className="btn-primary mt-4 w-full py-3">
                 <CalendarDays className="h-4 w-4" />
-                Agendar una visita
+                Solicitar una visita
               </BookVisitButton>
               <p className="mt-2 text-center text-[12px] text-humo">
-                Elige fecha y hora en el calendario. Sin compromiso.
+                Indica tu fecha preferida. Confirmamos disponibilidad contigo.
               </p>
 
               <div className="my-4 flex items-center gap-3">

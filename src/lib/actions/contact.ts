@@ -5,10 +5,15 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase/public";
 import type { ContactInterest } from "@/lib/types";
+import {
+  createMetaEventId,
+  sendMetaServerEvent,
+} from "@/lib/meta-conversions";
 
 export type ContactFormState = {
   status: "idle" | "success" | "error";
   message: string;
+  eventId?: string;
 };
 
 const INTERESTS: ContactInterest[] = ["compra", "renta", "venta", "inversion"];
@@ -30,10 +35,10 @@ export async function submitContactForm(
     return { status: "success", message: "Gracias, te contactaré pronto." };
   }
 
-  if (!fullName || (!email && !phone)) {
+  if (!fullName || !email || !phone) {
     return {
       status: "error",
-      message: "Necesito tu nombre y al menos un dato de contacto.",
+      message: "Necesito tu nombre, teléfono y correo para poder contactarte.",
     };
   }
 
@@ -70,9 +75,20 @@ export async function submitContactForm(
     };
   }
 
+  const eventId = createMetaEventId();
+  await sendMetaServerEvent({
+    eventName: "Lead",
+    eventId,
+    email,
+    phone,
+    contentName: `Contacto web · ${interest}`,
+    ...(propertyId ? { contentIds: [propertyId] } : {}),
+  });
+
   return {
     status: "success",
     message:
       "Gracias por escribir. Revisaré tu mensaje y te contactaré sin prisa, pero pronto.",
+    eventId,
   };
 }

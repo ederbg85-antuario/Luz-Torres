@@ -13,6 +13,7 @@ import { TrackedLink } from "./TrackedLink";
 const NAV = [
   { href: "/", label: "Inicio" },
   { href: "/propiedades", label: "Propiedades" },
+  { href: "/vende-tu-propiedad", label: "Vende tu propiedad" },
   { href: "/sobre-luz", label: "Sobre Luz" },
   { href: "/contacto", label: "Contacto" },
 ];

@@ -16,7 +16,7 @@ const NAV_LINKS = [
   { href: "/propiedades", label: "Todas las propiedades" },
   { href: "/sobre-luz", label: "Sobre Luz Torres" },
   { href: "/contacto", label: "Contacto" },
-  { href: "/contacto?intent=venta", label: "Quiero vender mi propiedad" },
+  { href: "/vende-tu-propiedad", label: "Quiero vender mi propiedad" },
 ];
 
 export function SiteFooter() {

@@ -44,7 +44,11 @@ export type AppointmentType =
   | "llamada"
   | "reunion"
   | "avaluo";
-export type AppointmentStatus = "programada" | "completada" | "cancelada";
+export type AppointmentStatus =
+  | "solicitud"
+  | "programada"
+  | "completada"
+  | "cancelada";
 
 export type TaskStatus =
   | "pendiente"
