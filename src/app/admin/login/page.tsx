@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { LoginForm } from "@/components/admin/LoginForm";
+import { SITE_URL } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
   title: "Panel de administración",
@@ -30,7 +31,7 @@ export default function LoginPage() {
         </div>
 
         <Link
-          href="/"
+          href={SITE_URL}
           className="mt-6 flex items-center justify-center gap-1.5 text-[13px] text-humo transition-colors hover:text-carbon"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

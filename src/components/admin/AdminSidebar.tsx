@@ -19,6 +19,7 @@ import {
 import { Logo } from "@/components/ui/Logo";
 import { signOut } from "@/lib/actions/auth";
 import { cn } from "@/lib/format";
+import { SITE_URL } from "@/lib/supabase/config";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -86,7 +87,7 @@ function SidebarBody({
 
       <div className="space-y-2 border-t border-white/10 pt-3">
         <Link
-          href="/"
+          href={SITE_URL}
           target="_blank"
           className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-bruma transition-colors hover:text-hueso"
         >
