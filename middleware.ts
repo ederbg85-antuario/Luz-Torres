@@ -6,7 +6,14 @@ const DASHBOARD_HOST = process.env.DASHBOARD_HOST || "dashboard.luztorres.com";
 const PUBLIC_HOST = new URL(SITE_URL).hostname;
 
 function requestHost(request: NextRequest) {
-  return request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
+  // En Vercel, `host` puede ser el alias interno del deployment. Conserva el
+  // dominio que pidió el visitante para distinguir el sitio del dashboard.
+  const host =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    request.nextUrl.hostname;
+
+  return host.split(",")[0]?.trim().split(":")[0]?.toLowerCase() ?? "";
 }
 
 export async function middleware(request: NextRequest) {
