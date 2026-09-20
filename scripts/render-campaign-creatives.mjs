@@ -5,6 +5,8 @@ import path from "node:path";
 import { createRequire } from "node:module";
 
 const root = path.resolve("../Campanas-2026-09");
+// Keep the first delivery recoverable while creating the airier revision.
+const outputRoot = path.join(root, "revision-aire");
 const green = "#1F4D4D",
   brown = "#6F4E37";
 const fontDir = path.join(root, "fuentes");
@@ -166,122 +168,39 @@ const properties = [
 ];
 const manifest = [];
 for (const p of properties) {
-  const dir = path.join(root, p.key, "creativos");
+  const dir = path.join(outputRoot, p.key, "creativos");
   await fs.mkdir(dir, { recursive: true });
   await save(dir, "01-portada-1080.jpg", 1080, [
-    { input: await logo(310), left: 48, top: 58 },
-    { input: await photo(p.key, p.photo, 602, 968), left: 430, top: 56 },
-    await text(p.kind, 48, 217, 18, 345, brown, false, "semibold"),
-    await text(
-      p.title,
-      44,
-      286,
-      p.key === "manzano" ? 70 : 90,
-      370,
-      green,
-      true,
-      "medium",
-    ),
-    await text(p.place, 48, 522, 25, 330),
-    await text(p.price, 48, 687, 43, 360, brown, false, "bold"),
-    await text("MXN", 48, 747, 23, 300, brown),
-    {
-      input: svg(
-        350,
-        70,
-        `<rect width="350" height="70" rx="35" fill="${green}"/>`,
-      ),
-      left: 48,
-      top: 846,
-    },
-    await text(
-      "Solicita tu visita ↗",
-      75,
-      868,
-      25,
-      310,
-      "#FFFFFF",
-      false,
-      "semibold",
-    ),
-    await text("luztorres.com", 48, 996, 22, 330),
+    { input: await logo(240), left: 72, top: 60 },
+    await text(p.kind + " · " + p.place, 72, 141, 23, 936, brown, false, "medium"),
+    await text(p.short, 68, 191, 74, 944, green, true, "medium"),
+    { input: await photo(p.key, p.photo, 936, 592), left: 72, top: 310 },
+    await text(p.price + " MXN", 72, 954, 42, 575, brown, false, "semibold"),
+    await text("Solicita tu visita →", 727, 969, 27, 290, green),
   ]);
   await save(dir, "02-espacios-1080.jpg", 1080, [
-    { input: await logo(280), left: 56, top: 58 },
-    { input: await photo(p.key, p.detail, 566, 870), left: 458, top: 154 },
-    await text(p.detailTitle, 52, 250, 65, 360, green, true, "medium"),
-    await text(p.specs, 56, 505, 31, 340, brown, false, "medium"),
-    await text(p.short, 56, 911, 24, 345),
-    await text("Desliza para conocer más →", 56, 971, 19, 345),
+    { input: await logo(240), left: 72, top: 60 },
+    { input: await photo(p.key, p.detail, 936, 625), left: 72, top: 170 },
+    await text(p.key === "manzano" ? "Espacio para tu día a día." : "Tu espacio en la ciudad.", 68, 852, 64, 944, green, true, "medium"),
+    await text(p.key === "manzano" ? "112.5 m² de construcción · Cocina integral" : "68 m² · 2 recámaras · 2 baños · 2 autos", 72, 955, 29, 936, brown),
   ]);
   await save(dir, "03-descubre-1080.jpg", 1080, [
-    { input: await logo(280), left: 56, top: 54 },
-    { input: await photo(p.key, p.third, 968, 645), left: 56, top: 155 },
-    await text(p.thirdTitle, 56, 840, 55, 960, green, true, "semibold"),
-    await text(p.thirdText, 56, 930, 28, 950, brown),
+    { input: await logo(240), left: 72, top: 60 },
+    { input: await photo(p.key, p.third, 936, 625), left: 72, top: 170 },
+    await text(p.thirdTitle, 68, 852, 64, 944, green, true, "medium"),
+    await text(p.key === "manzano" ? "Descubre la casa con Luz Torres." : "Alberca, gimnasio y coworking · Áreas comunes", 72, 955, 28, 936, brown),
   ]);
   await save(
     dir,
     "04-solicita-visita-1080.jpg",
     1080,
     [
-      { input: await logo(400, "#FFFFFF"), left: 64, top: 66 },
-      await text(
-        "EL SIGUIENTE PASO",
-        64,
-        275,
-        21,
-        920,
-        "#E8D5C5",
-        false,
-        "medium",
-      ),
-      await text(
-        "Conócelo\nen persona.",
-        58,
-        355,
-        112,
-        960,
-        "#FFFFFF",
-        true,
-        "medium",
-      ),
-      await text(
-        p.short + " · " + p.price + " MXN",
-        64,
-        657,
-        29,
-        930,
-        "#FFFFFF",
-      ),
-      {
-        input: svg(
-          550,
-          90,
-          `<rect width="550" height="90" rx="45" fill="#FFFFFF"/>`,
-        ),
-        left: 64,
-        top: 768,
-      },
-      await text(
-        "Solicita tu visita con Luz ↗",
-        98,
-        797,
-        30,
-        480,
-        brown,
-        false,
-        "semibold",
-      ),
-      await text(
-        "Visita sujeta a confirmación de disponibilidad.",
-        64,
-        910,
-        23,
-        920,
-        "#F1E6DC",
-      ),
-      await text("luztorres.com", 64, 986, 23, 920, "#FFFFFF"),
+      { input: await logo(260, "#FFFFFF"), left: 80, top: 80 },
+      await text(p.short, 80, 278, 32, 920, "#F1E6DC"),
+      await text(p.key === "manzano" ? "¿La conoces\nen persona?" : "¿Lo conoces\nen persona?", 74, 379, 112, 930, "#FFFFFF", true, "medium"),
+      await text("Solicita tu visita con Luz →", 80, 747, 36, 920, "#FFFFFF"),
+      await text("Fecha sujeta a confirmación.", 80, 902, 25, 920, "#F1E6DC"),
+      await text("luztorres.com", 80, 964, 25, 920, "#FFFFFF"),
     ],
     brown,
   );
@@ -290,56 +209,20 @@ for (const p of properties) {
     [1920, "06-stories-1080x1920.jpg"],
   ]) {
     const story = height === 1920,
-      top = story ? 250 : 55,
-      photoTop = top + 196,
-      photoHeight = story ? 800 : 680;
-    const bottom = photoTop + photoHeight + 36;
+      top = story ? 290 : 70,
+      photoTop = story ? 680 : 370,
+      photoHeight = story ? 600 : 660;
     await save(dir, name, height, [
-      { input: await logo(330), left: 58, top },
-      await text(p.kind, 58, top + 96, 20, 950, brown, false, "semibold"),
-      await text(p.short, 54, top + 126, 52, 960, green, true, "semibold"),
+      { input: await logo(story ? 260 : 240), left: 72, top },
+      await text(p.kind + " · " + p.place, 72, story ? 425 : 173, story ? 25 : 23, 936, brown, false, "medium"),
+      await text(p.short, 68, story ? 493 : 228, story ? 90 : 80, 944, green, true, "medium"),
       {
-        input: await photo(p.key, p.photo, 964, photoHeight),
-        left: 58,
+        input: await photo(p.key, p.photo, 936, photoHeight),
+        left: 72,
         top: photoTop,
       },
-      await text(p.place, 58, bottom, 26, 950),
-      await text(
-        p.price + " MXN",
-        58,
-        bottom + 52,
-        49,
-        950,
-        brown,
-        false,
-        "bold",
-      ),
-      {
-        input: svg(
-          460,
-          76,
-          `<rect width="460" height="76" rx="38" fill="${green}"/>`,
-        ),
-        left: 58,
-        top: bottom + 133,
-      },
-      await text(
-        "Solicita tu visita ↗",
-        93,
-        bottom + 157,
-        32,
-        400,
-        "#FFFFFF",
-        false,
-        "semibold",
-      ),
-      await text(
-        "luztorres.com · Sujeta a confirmación",
-        58,
-        bottom + 240,
-        23,
-        950,
-      ),
+      await text(p.price + " MXN", 72, story ? 1385 : 1120, story ? 58 : 50, 936, brown, false, "semibold"),
+      await text("Solicita tu visita →", 72, story ? 1525 : 1230, story ? 38 : 31, 936, green),
     ]);
   }
   manifest.push({
@@ -347,16 +230,16 @@ for (const p of properties) {
     url: `https://luztorres.com/propiedades/${p.slug}`,
     files: await fs.readdir(dir),
   });
-  await fs.mkdir(path.join(root, "meta"), { recursive: true });
+  await fs.mkdir(path.join(outputRoot, "meta"), { recursive: true });
   for (const file of await fs.readdir(dir))
     await fs.copyFile(
       path.join(dir, file),
-      path.join(root, "meta", `${p.key}-${file}`),
+      path.join(outputRoot, "meta", `${p.key}-v2-${file}`),
     );
   console.log(`${p.key}: 4 tarjetas, 1 feed, 1 story.`);
 }
 await fs.writeFile(
-  path.join(root, "manifest.json"),
+  path.join(outputRoot, "manifest.json"),
   JSON.stringify(
     {
       createdAt: new Date().toISOString(),
@@ -372,20 +255,20 @@ const thumbs = [];
 for (let pi = 0; pi < properties.length; pi++)
   for (let i = 0; i < 4; i++) {
     const p = properties[pi],
-      filename = (await fs.readdir(path.join(root, p.key, "creativos"))).sort()[
+      filename = (await fs.readdir(path.join(outputRoot, p.key, "creativos"))).sort()[
         i
       ];
     thumbs.push({
-      input: await sharp(path.join(root, p.key, "creativos", filename))
+      input: await sharp(path.join(outputRoot, p.key, "creativos", filename))
         .resize(360, 360)
         .toBuffer(),
-      left: i * 360,
-      top: pi * 360,
+      left: 24 + i * 384,
+      top: 24 + pi * 384,
     });
   }
 await sharp({
-  create: { width: 1440, height: 720, channels: 3, background: "#fff" },
+  create: { width: 1560, height: 792, channels: 3, background: "#eef0ef" },
 })
   .composite(thumbs)
   .jpeg({ quality: 93 })
-  .toFile(path.join(root, "vista-previa.jpg"));
+  .toFile(path.join(outputRoot, "vista-previa.jpg"));
