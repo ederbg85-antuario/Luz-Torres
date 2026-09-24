@@ -31,7 +31,7 @@ export function SellerForm() {
       lead_type: "seller",
     });
     trackMetaEvent(
-      "Lead",
+      "SellerLead",
       { content_name: "Solicitud para vender propiedad", content_category: "seller_request" },
       state.eventId
     );

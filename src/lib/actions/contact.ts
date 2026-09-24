@@ -81,7 +81,7 @@ export async function submitContactForm(
 
   const eventId = createMetaEventId();
   await sendMetaServerEvent({
-    eventName: "Lead",
+    eventName: "ContactLead",
     eventId,
     email,
     phone,

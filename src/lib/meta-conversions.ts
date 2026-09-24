@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 import { SITE_URL } from "@/lib/supabase/config";
 import { hashMetaValue, normalizeMetaPhone, metaSourceUrl, metaClickId } from "@/lib/meta-event-data";
 
-type MetaEventName = "Lead" | "Contact";
+type MetaEventName = "Lead" | "Contact" | "SellerLead" | "ContactLead";
 
 type MetaServerEvent = {
   eventName: MetaEventName;

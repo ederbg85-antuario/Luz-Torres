@@ -40,7 +40,7 @@ export function ContactForm({
         event_id: state.eventId,
       });
       trackMetaEvent(
-        "Lead",
+        "ContactLead",
         {
           content_name: `Contacto web · ${defaultInterest}`,
           content_category: "contact_request",

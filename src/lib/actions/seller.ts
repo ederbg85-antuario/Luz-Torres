@@ -77,7 +77,7 @@ export async function submitSellerForm(
 
   const eventId = createMetaEventId();
   await sendMetaServerEvent({
-    eventName: "Lead",
+    eventName: "SellerLead",
     eventId,
     email,
     phone,

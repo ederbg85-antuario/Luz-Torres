@@ -7,7 +7,7 @@ declare global {
 }
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-type EventName = "Contact" | "Lead" | "PageView" | "ViewContent";
+type EventName = "Contact" | "Lead" | "PageView" | "ViewContent" | "SellerLead" | "ContactLead";
 type QueuedEvent = { name: EventName; params: Record<string, unknown>; id?: string };
 const pendingEvents: QueuedEvent[] = [];
 const sentIds = new Set<string>();
@@ -38,5 +38,8 @@ export function trackMetaEvent(
   const key = eventId ? `${eventName}:${eventId}` : undefined;
   if (key && sentIds.has(key)) return;
   if (key) sentIds.add(key);
-  window.fbq("trackSingle", PIXEL_ID, eventName, params, eventId ? { eventID: eventId } : {});
+  const method = eventName === "SellerLead" || eventName === "ContactLead"
+    ? "trackSingleCustom"
+    : "trackSingle";
+  window.fbq(method, PIXEL_ID, eventName, params, eventId ? { eventID: eventId } : {});
 }
