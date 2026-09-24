@@ -45,8 +45,8 @@ export async function sendMetaServerEvent(event: MetaServerEvent) {
   const phone = event.phone ? normalizeMetaPhone(event.phone) : "";
   const forwardedFor = requestHeaders.get("x-forwarded-for");
   const clientIp = forwardedFor?.split(",")[0]?.trim();
-  const referer = event.sourceUrl || requestHeaders.get("referer");
-  const sourceUrl = metaSourceUrl(referer, SITE_URL);
+  const referer = requestHeaders.get("referer");
+  const sourceUrl = metaSourceUrl(event.sourceUrl || referer, SITE_URL);
 
   const userData: Record<string, string> = {};
   if (email) userData.em = hashMetaValue(email);
