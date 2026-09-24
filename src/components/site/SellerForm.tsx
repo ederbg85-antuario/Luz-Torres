@@ -22,7 +22,7 @@ export function SellerForm() {
   const [state, action, pending] = useActionState(submitSellerForm, INITIAL);
 
   useEffect(() => {
-    if (state.status !== "success") return;
+    if (state.status !== "success" || !state.eventId) return;
     // Reutiliza la conversión de GA4 ya publicada para todos los prospectos
     // y conserva el tipo de interés para distinguir a quien desea vender.
     pushEvent("generate_lead", {
@@ -32,7 +32,7 @@ export function SellerForm() {
     });
     trackMetaEvent(
       "Lead",
-      { content_name: "Solicitud para vender propiedad" },
+      { content_name: "Solicitud para vender propiedad", content_category: "seller_request" },
       state.eventId
     );
   }, [state.eventId, state.status]);

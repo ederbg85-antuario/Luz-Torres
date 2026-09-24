@@ -30,7 +30,7 @@ export function ContactForm({
   );
 
   useEffect(() => {
-    if (state.status === "success") {
+    if (state.status === "success" && state.eventId) {
       pushEvent("generate_lead", {
         interest: defaultInterest,
         property_id: propertyId,
@@ -40,13 +40,13 @@ export function ContactForm({
         "Lead",
         {
           content_name: `Contacto web · ${defaultInterest}`,
+          content_category: "contact_request",
           ...(propertyId ? { content_ids: [propertyId], content_type: "product" } : {}),
         },
         state.eventId
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.status]);
+  }, [state.status, state.eventId, defaultInterest, propertyId]);
 
   if (state.status === "success") {
     return (

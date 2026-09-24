@@ -42,6 +42,10 @@ export async function submitContactForm(
     };
   }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{10,15}$/.test(phone.replace(/\D/g, ""))) {
+    return { status: "error", message: "Escribe un correo y un teléfono válidos." };
+  }
+
   if (!isSupabaseConfigured()) {
     return {
       status: "error",
@@ -82,6 +86,7 @@ export async function submitContactForm(
     email,
     phone,
     contentName: `Contacto web · ${interest}`,
+    contentCategory: "contact_request",
     ...(propertyId ? { contentIds: [propertyId] } : {}),
   });
 

@@ -1,10 +1,11 @@
 import "server-only";
 
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { SITE_URL } from "@/lib/supabase/config";
+import { hashMetaValue, normalizeMetaPhone, metaSourceUrl, metaClickId } from "@/lib/meta-event-data";
 
-type MetaEventName = "Lead" | "Schedule";
+type MetaEventName = "Lead" | "Contact";
 
 type MetaServerEvent = {
   eventName: MetaEventName;
@@ -16,17 +17,9 @@ type MetaServerEvent = {
   contentIds?: string[];
   value?: number;
   currency?: string;
+  sourceUrl?: string;
+  placement?: string;
 };
-
-function sha256(value: string) {
-  return createHash("sha256").update(value).digest("hex");
-}
-
-function normalizePhone(phone: string) {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length === 10) return `52${digits}`;
-  return digits;
-}
 
 /** Identificador opaco compartido entre el navegador y Conversions API. */
 export function createMetaEventId() {
@@ -49,19 +42,20 @@ export async function sendMetaServerEvent(event: MetaServerEvent) {
     cookies(),
   ]);
   const email = event.email?.trim().toLowerCase();
-  const phone = event.phone ? normalizePhone(event.phone) : "";
+  const phone = event.phone ? normalizeMetaPhone(event.phone) : "";
   const forwardedFor = requestHeaders.get("x-forwarded-for");
   const clientIp = forwardedFor?.split(",")[0]?.trim();
-  const sourceUrl = requestHeaders.get("referer") || SITE_URL;
+  const referer = event.sourceUrl || requestHeaders.get("referer");
+  const sourceUrl = metaSourceUrl(referer, SITE_URL);
 
   const userData: Record<string, string> = {};
-  if (email) userData.em = sha256(email);
-  if (phone) userData.ph = sha256(phone);
+  if (email) userData.em = hashMetaValue(email);
+  if (phone) userData.ph = hashMetaValue(phone);
   if (clientIp) userData.client_ip_address = clientIp;
   const userAgent = requestHeaders.get("user-agent");
   if (userAgent) userData.client_user_agent = userAgent;
   const fbp = cookieStore.get("_fbp")?.value;
-  const fbc = cookieStore.get("_fbc")?.value;
+  const fbc = metaClickId(cookieStore.get("_fbc")?.value, referer);
   if (fbp) userData.fbp = fbp;
   if (fbc) userData.fbc = fbc;
 
@@ -75,43 +69,53 @@ export async function sendMetaServerEvent(event: MetaServerEvent) {
       : {}),
     ...(typeof event.value === "number" ? { value: event.value } : {}),
     ...(event.currency ? { currency: event.currency } : {}),
+    ...(event.placement ? { placement: event.placement } : {}),
   };
 
+  const body = JSON.stringify({
+    access_token: accessToken,
+    data: [{
+      event_name: event.eventName,
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: event.eventId,
+      event_source_url: sourceUrl,
+      action_source: "website",
+      user_data: userData,
+      custom_data: customData,
+    }],
+    ...(process.env.META_CAPI_TEST_EVENT_CODE
+      ? { test_event_code: process.env.META_CAPI_TEST_EVENT_CODE }
+      : {}),
+  });
   try {
-    const response = await fetch(
-      `https://graph.facebook.com/v22.0/${encodeURIComponent(pixelId)}/events?access_token=${encodeURIComponent(accessToken)}`,
+    const send = () => fetch(
+      `https://graph.facebook.com/v22.0/${encodeURIComponent(pixelId)}/events`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: [
-            {
-              event_name: event.eventName,
-              event_time: Math.floor(Date.now() / 1000),
-              event_id: event.eventId,
-              event_source_url: sourceUrl,
-              action_source: "website",
-              user_data: userData,
-              custom_data: customData,
-            },
-          ],
-          ...(process.env.META_CAPI_TEST_EVENT_CODE
-            ? { test_event_code: process.env.META_CAPI_TEST_EVENT_CODE }
-            : {}),
-        }),
+        body,
         cache: "no-store",
         signal: AbortSignal.timeout(4000),
       },
     );
 
-    if (!response.ok) {
+    let response = await send();
+    // Mismo ID y hora en el reintento: una conversión nunca se duplica.
+    if (response.status === 429 || response.status >= 500) response = await send();
+    const result = await response.json() as {
+      events_received?: number;
+      fbtrace_id?: string;
+      error?: { code?: number; error_subcode?: number };
+    };
+    if (!response.ok || result.events_received !== 1) {
       console.error(
         "Meta Conversions API respondió con error",
-        response.status,
+        { status: response.status, code: result.error?.code, subcode: result.error?.error_subcode, eventId: event.eventId },
       );
       return { sent: false, reason: "api_error" };
     }
-    return { sent: true };
+    console.info("meta_capi_accepted", { pixelId, eventName: event.eventName, category: event.contentCategory, eventId: event.eventId, eventsReceived: result.events_received, traceId: result.fbtrace_id });
+    return { sent: true, eventId: event.eventId };
   } catch {
     console.error("No se pudo enviar la conversión a Meta CAPI");
     return { sent: false, reason: "network_error" };

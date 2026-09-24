@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { pushEvent } from "@/lib/gtm";
 import { trackMetaEvent } from "@/lib/meta";
 
@@ -15,7 +15,10 @@ export function PropertyTracking({
   price: number;
   operation: string;
 }) {
+  const lastProperty = useRef<string | null>(null);
   useEffect(() => {
+    if (lastProperty.current === id) return;
+    lastProperty.current = id;
     const params = {
       content_ids: [id],
       content_name: title,
@@ -25,7 +28,7 @@ export function PropertyTracking({
       operation,
     };
     pushEvent("view_property", params);
-    trackMetaEvent("ViewContent", params);
+    trackMetaEvent("ViewContent", params, crypto.randomUUID());
   }, [id, operation, price, title]);
 
   return null;

@@ -35,7 +35,24 @@ export function TrackedLink({
       className={className}
       onClick={() => {
         pushEvent(event, params);
-        if (event.startsWith("contacto_")) {
+        if (event === "contacto_whatsapp") {
+          const eventId = crypto.randomUUID();
+          const propertyId = typeof params?.property_id === "string" ? params.property_id : undefined;
+          const placement = typeof params?.ubicacion === "string" ? params.ubicacion : undefined;
+          trackMetaEvent("Contact", {
+            content_name: "WhatsApp",
+            content_category: "whatsapp_click",
+            ...(propertyId ? { content_ids: [propertyId], content_type: "product" } : {}),
+            ...(placement ? { placement } : {}),
+          }, eventId);
+          // El envío sobrevive al cambio de pestaña; no se envía el mensaje ni el número del enlace.
+          void fetch("/api/meta/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventId, propertyId, placement, sourceUrl: window.location.href }),
+            keepalive: true,
+          }).catch(() => {});
+        } else if (event.startsWith("contacto_")) {
           trackMetaEvent("Contact", {
             content_name: event.replace("contacto_", ""),
             ...params,

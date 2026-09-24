@@ -36,6 +36,10 @@ export async function submitSellerForm(
     };
   }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{10,15}$/.test(phone.replace(/\D/g, ""))) {
+    return { status: "error", message: "Escribe un correo y un teléfono válidos." };
+  }
+
   if (!isSupabaseConfigured()) {
     return {
       status: "error",
@@ -77,6 +81,7 @@ export async function submitSellerForm(
     email,
     phone,
     contentName: "Solicitud para vender propiedad",
+    contentCategory: "seller_request",
   });
 
   return {
