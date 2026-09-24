@@ -5,6 +5,7 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase/public";
 import { createMetaEventId, sendMetaServerEvent } from "@/lib/meta-conversions";
+import { SITE_URL } from "@/lib/supabase/config";
 
 export type SellerFormState = {
   status: "idle" | "success" | "error";
@@ -82,6 +83,7 @@ export async function submitSellerForm(
     phone,
     contentName: "Solicitud para vender propiedad",
     contentCategory: "seller_request",
+    sourceUrl: `${SITE_URL}/vende-tu-propiedad`,
   });
 
   return {

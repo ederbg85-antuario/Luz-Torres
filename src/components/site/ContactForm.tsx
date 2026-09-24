@@ -10,6 +10,8 @@ import { CONTACT_INTEREST_LABELS } from "@/lib/constants";
 import { pushEvent } from "@/lib/gtm";
 import { trackMetaEvent } from "@/lib/meta";
 import type { ContactInterest } from "@/lib/types";
+import { usePathname } from "next/navigation";
+import { SITE_URL } from "@/lib/supabase/config";
 
 const INITIAL: ContactFormState = { status: "idle", message: "" };
 
@@ -24,6 +26,7 @@ export function ContactForm({
   defaultInterest?: ContactInterest;
   compact?: boolean;
 }) {
+  const pathname = usePathname();
   const [state, action, pending] = useActionState(
     submitContactForm,
     INITIAL
@@ -60,6 +63,7 @@ export function ContactForm({
 
   return (
     <form action={action} className="space-y-3.5">
+      <input type="hidden" name="source_url" value={`${SITE_URL}${pathname}`} />
       {propertyId && (
         <input type="hidden" name="property_id" value={propertyId} />
       )}

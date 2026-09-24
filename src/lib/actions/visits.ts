@@ -67,6 +67,7 @@ export type VisitRequestInput = {
   message: string;
   /** Honeypot anti-spam: si viene lleno, fingimos éxito. */
   company?: string;
+  source_url?: string;
 };
 
 export type VisitRequestResult = {
@@ -135,6 +136,7 @@ export async function requestVisit(
       contentName: "Solicitud de visita",
       contentCategory: "visit_request",
       contentIds: [input.property_id],
+      sourceUrl: input.source_url,
     });
     return { ok: true, eventId };
   } catch {

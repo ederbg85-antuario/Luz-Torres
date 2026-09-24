@@ -87,6 +87,7 @@ export async function submitContactForm(
     phone,
     contentName: `Contacto web · ${interest}`,
     contentCategory: "contact_request",
+    sourceUrl: String(formData.get("source_url") ?? "") || undefined,
     ...(propertyId ? { contentIds: [propertyId] } : {}),
   });
 
