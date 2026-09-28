@@ -22,9 +22,11 @@ import { PropertyMap } from "@/components/site/PropertyMap";
 import { PropertyTracking } from "@/components/site/PropertyTracking";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { VisitBooking, BookVisitButton } from "@/components/site/VisitBooking";
+import { PropertyWhatsAppPreset } from "@/components/site/WhatsAppPreset";
 import {
   PROPERTY_TYPE_LABELS,
   SITE,
+  propertyWhatsAppMessage,
   statusBadge,
   whatsappLink,
 } from "@/lib/constants";
@@ -103,12 +105,12 @@ export default async function PropertyDetailPage({
         ),
       ),
   );
-  const waMessage = `Hola Luz, me interesa ${property.title}. ¿Me compartes disponibilidad para visitarla? https://luztorres.com/propiedades/${property.slug}`;
+  const waMessage = propertyWhatsAppMessage(property);
   const contact = (
     <>
       <BookVisitButton className="btn-primary w-full py-4">
         <CalendarDays size={18} />
-        Solicitar visita
+        Quiero que me contacten
       </BookVisitButton>
       <TrackedLink
         href={whatsappLink(waMessage)}
@@ -126,7 +128,7 @@ export default async function PropertyDetailPage({
         Consultar por WhatsApp
       </TrackedLink>
       <p className="mt-4 text-center text-xs leading-relaxed text-humo">
-        Elige tu fecha. Luz te confirma la disponibilidad.
+        Te contacto por WhatsApp para agendar la visita.
       </p>
     </>
   );
@@ -137,6 +139,11 @@ export default async function PropertyDetailPage({
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(propertyJsonLd(property, images)),
         }}
+      />
+      <PropertyWhatsAppPreset
+        message={waMessage}
+        propertyId={property.id}
+        propertyTitle={property.title}
       />
       <PropertyTracking
         id={property.id}

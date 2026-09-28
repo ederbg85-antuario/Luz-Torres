@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { SITE, whatsappLink } from "@/lib/constants";
+import { SITE } from "@/lib/constants";
 import { cn } from "@/lib/format";
 import { WhatsAppIcon } from "./WhatsAppFab";
-import { TrackedLink } from "./TrackedLink";
+import { WhatsAppCta } from "./WhatsAppPreset";
 
 const NAV = [
   { href: "/", label: "Inicio" },
@@ -54,19 +54,14 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <TrackedLink
-            href={whatsappLink(
-              "Hola Luz, vi tu sitio y me gustaría más información.",
-            )}
-            event="contacto_whatsapp"
-            params={{ ubicacion: "header_desktop" }}
-            target="_blank"
-            rel="noopener noreferrer"
+          <WhatsAppCta
+            fallbackMessage="Hola Luz, vi tu sitio y me gustaría más información."
+            ubicacion="header_desktop"
             className="btn-accent hidden px-4 py-2.5 lg:inline-flex"
           >
             <WhatsAppIcon className="h-4 w-4" />
             WhatsApp
-          </TrackedLink>
+          </WhatsAppCta>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -99,17 +94,13 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <TrackedLink
-              href={whatsappLink()}
-              event="contacto_whatsapp"
-              params={{ ubicacion: "header_movil" }}
-              target="_blank"
-              rel="noopener noreferrer"
+            <WhatsAppCta
+              ubicacion="header_movil"
               className="btn-whatsapp mt-2"
             >
               <WhatsAppIcon className="h-4 w-4" />
               Escribir por WhatsApp · {SITE.phoneDisplay}
-            </TrackedLink>
+            </WhatsAppCta>
           </nav>
         </div>
       )}

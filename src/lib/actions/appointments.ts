@@ -9,7 +9,7 @@ export type AppointmentInput = {
   type: AppointmentType;
   contact_id: string | null;
   property_id: string | null;
-  starts_at: string;
+  starts_at: string | null;
   ends_at: string | null;
   location: string;
   notes: string;
@@ -24,7 +24,7 @@ function toRow(input: AppointmentInput) {
     type: input.type,
     contact_id: input.contact_id || null,
     property_id: input.property_id || null,
-    starts_at: new Date(input.starts_at).toISOString(),
+    starts_at: input.starts_at ? new Date(input.starts_at).toISOString() : null,
     ends_at: input.ends_at ? new Date(input.ends_at).toISOString() : null,
     location: input.location.trim() || null,
     notes: input.notes.trim() || null,

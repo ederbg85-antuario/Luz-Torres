@@ -19,7 +19,7 @@ import {
   CONTACT_STAGE_LABELS,
 } from "@/lib/constants";
 import { stageTone } from "@/lib/badges";
-import { formatDate, formatDateTime, formatPrice } from "@/lib/format";
+import { appointmentWhen, formatDate, formatPrice } from "@/lib/format";
 
 function waLink(phone: string | null) {
   if (!phone) return null;
@@ -189,10 +189,12 @@ export default async function ContactDetailPage({
                     <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-petroleo" />
                     <div>
                       <p className="text-[13px] font-medium text-carbon">
-                        {APPOINTMENT_TYPE_LABELS[a.type]}
+                        {a.starts_at
+                          ? APPOINTMENT_TYPE_LABELS[a.type]
+                          : "Contactar para agendar"}
                       </p>
                       <p className="text-[12px] text-humo">
-                        {formatDateTime(a.starts_at)}
+                        {a.starts_at ? appointmentWhen(a.starts_at) : a.title}
                       </p>
                     </div>
                   </li>

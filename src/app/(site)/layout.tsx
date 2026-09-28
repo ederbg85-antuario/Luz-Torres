@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { WhatsAppFab } from "@/components/site/WhatsAppFab";
+import { WhatsAppPresetProvider } from "@/components/site/WhatsAppPreset";
 import { PublicTracking } from "@/components/site/PublicTracking";
 
 export default function SiteLayout({
@@ -9,12 +10,14 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="public-site flex min-h-screen flex-col bg-white">
-      <PublicTracking />
-      <SiteHeader />
-      <main className="flex-1">{children}</main>
-      <SiteFooter />
-      <WhatsAppFab />
-    </div>
+    <WhatsAppPresetProvider>
+      <div className="public-site flex min-h-screen flex-col bg-white">
+        <PublicTracking />
+        <SiteHeader />
+        <main className="flex-1">{children}</main>
+        <SiteFooter />
+        <WhatsAppFab />
+      </div>
+    </WhatsAppPresetProvider>
   );
 }

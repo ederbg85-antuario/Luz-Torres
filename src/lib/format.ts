@@ -71,6 +71,11 @@ export function formatDateTime(iso: string | null) {
   return `${formatDate(iso)} · ${formatTime(iso)}`;
 }
 
+/** Fecha de una cita, o la marca de las solicitudes que aún no tienen horario. */
+export function appointmentWhen(iso: string | null) {
+  return iso ? formatDateTime(iso) : "Contactar para agendar";
+}
+
 /** "hace 2 días", "en 3 días" */
 export function formatRelative(iso: string | null) {
   if (!iso) return "—";
