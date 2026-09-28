@@ -117,10 +117,15 @@ un segundo Meta Pixel desde GTM si usas la integración directa del sitio.
 
 ### Solicitudes de visita
 
-Ejecuta `supabase/migrations/0005_solicitudes_visita.sql` una vez en el SQL
-Editor de Supabase. La migración registra solicitudes con estatus
-`solicitud`; no bloquea la agenda ni confirma una cita hasta que el equipo la
-cambie a `programada` en el panel.
+Ejecuta en el SQL Editor de Supabase, en este orden, si aún no están aplicadas:
+
+1. `supabase/migrations/0005_solicitudes_visita.sql` — solicitudes con estatus
+   `solicitud`. No bloquean la agenda ni confirman una cita hasta que el equipo
+   la cambie a `programada` en el panel.
+2. `supabase/migrations/0007_contacto_para_agendar.sql` — permite solicitudes
+   sin fecha ni correo. `appointments.starts_at` pasa a ser opcional; las citas
+   que ya tienen fecha no se modifican. Sin fecha, la agenda las muestra como
+   «Contactar para agendar».
 
 ### Dominio del panel
 

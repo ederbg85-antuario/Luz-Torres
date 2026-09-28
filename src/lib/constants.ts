@@ -1,3 +1,5 @@
+import { SITE_URL } from "./supabase/config";
+import { propertyWhatsAppMessage as buildPropertyWhatsAppMessage } from "./whatsapp-message";
 import type {
   AppointmentStatus,
   AppointmentType,
@@ -29,6 +31,13 @@ export const SITE = {
 export function whatsappLink(message?: string) {
   const base = `https://wa.me/${SITE.whatsapp}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}
+
+export { listingKeyFromSlug } from "./whatsapp-message";
+
+/** Mensaje de WhatsApp que identifica la propiedad por título, clave y URL. */
+export function propertyWhatsAppMessage(property: { title: string; slug: string }) {
+  return buildPropertyWhatsAppMessage(property, SITE_URL);
 }
 
 /**

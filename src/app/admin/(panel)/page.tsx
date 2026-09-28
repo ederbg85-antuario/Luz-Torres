@@ -19,7 +19,7 @@ import {
   CONTACT_SOURCE_LABELS,
 } from "@/lib/constants";
 import { stageTone } from "@/lib/badges";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { appointmentWhen, formatDate } from "@/lib/format";
 
 export default async function DashboardPage() {
   const data = await getDashboardData();
@@ -121,7 +121,7 @@ export default async function DashboardPage() {
                     </p>
                     <p className="text-[12px] text-humo">
                       {APPOINTMENT_TYPE_LABELS[a.type]} ·{" "}
-                      {formatDateTime(a.starts_at)}
+                      {appointmentWhen(a.starts_at)}
                       {a.contact ? ` · ${a.contact.full_name}` : ""}
                     </p>
                   </div>

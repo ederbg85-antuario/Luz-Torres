@@ -27,7 +27,7 @@ import type {
   AppointmentStatus,
   AppointmentType,
 } from "@/lib/types";
-import { cn, formatDateTime } from "@/lib/format";
+import { appointmentWhen, cn, formatDateTime } from "@/lib/format";
 
 const DAY_NAMES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -87,16 +87,57 @@ export function AgendaView({
     );
   }, [cursor]);
 
+  const toContact = useMemo(
+    () =>
+      appointments
+        .filter((a) => !a.starts_at && a.status === "solicitud")
+        .sort((a, b) => b.created_at.localeCompare(a.created_at)),
+    [appointments]
+  );
+
   const upcoming = useMemo(
     () =>
       [...appointments]
-        .filter((a) => new Date(a.starts_at) >= new Date())
+        .filter((a) => a.starts_at && new Date(a.starts_at) >= new Date())
         .slice(0, 8),
     [appointments]
   );
 
   return (
     <div className="space-y-6">
+      {toContact.length > 0 && (
+        <div className="rounded-xl border border-vivo/30 bg-papel p-5 shadow-soft">
+          <h2 className="font-semibold text-carbon">Contactar para agendar</h2>
+          <p className="mt-1 text-sm text-humo">
+            Solicitudes sin fecha. Hay que escribirles para cuadrar la visita.
+          </p>
+          <ul className="mt-3 divide-y divide-lino">
+            {toContact.map((a) => (
+              <li key={a.id}>
+                <button
+                  type="button"
+                  onClick={() => setDialog({ mode: "edit", appointment: a })}
+                  className="flex w-full items-center gap-3 py-2.5 text-left"
+                >
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-vivo/12 text-vivo">
+                    <CalendarClock className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-carbon">
+                      {a.title}
+                    </span>
+                    <span className="block text-[12px] text-humo">
+                      Contactar para agendar · {APPOINTMENT_STATUS_LABELS[a.status]}
+                      {a.contact ? ` · ${a.contact.full_name}` : ""}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Calendario */}
       <div className="rounded-xl bg-papel p-4 shadow-soft sm:p-5">
         <div className="flex items-center justify-between">
@@ -155,8 +196,8 @@ export function AgendaView({
           {grid.map((day, i) => {
             const inMonth = day.getMonth() === cursor.getMonth();
             const isToday = sameDay(day, today);
-            const dayAppts = appointments.filter((a) =>
-              sameDay(new Date(a.starts_at), day)
+            const dayAppts = appointments.filter(
+              (a) => a.starts_at && sameDay(new Date(a.starts_at), day)
             );
             return (
               <div
@@ -202,10 +243,12 @@ export function AgendaView({
                         a.status === "solicitud" && "ring-1 ring-vivo/60"
                       )}
                     >
-                      {new Date(a.starts_at).toLocaleTimeString("es-MX", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
+                      {a.starts_at
+                        ? new Date(a.starts_at).toLocaleTimeString("es-MX", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Contactar"}{" "}
                       {a.title}
                     </button>
                   ))}
@@ -247,7 +290,7 @@ export function AgendaView({
                     </span>
                     <span className="block text-[12px] text-humo">
                       {APPOINTMENT_STATUS_LABELS[a.status]} · {APPOINTMENT_TYPE_LABELS[a.type]} ·{" "}
-                      {formatDateTime(a.starts_at)}
+                      {a.starts_at ? formatDateTime(a.starts_at) : appointmentWhen(a.starts_at)}
                       {a.contact ? ` · ${a.contact.full_name}` : ""}
                     </span>
                   </span>
@@ -306,7 +349,9 @@ function AppointmentDialog({
             0
           )
         )
-      : toLocalInput(new Date(state.mode === "edit" ? editing!.starts_at : ""));
+      : editing?.starts_at
+        ? toLocalInput(new Date(editing.starts_at))
+        : "";
 
   const [form, setForm] = useState({
     title: editing?.title ?? "",
@@ -330,7 +375,7 @@ function AppointmentDialog({
     const input: AppointmentInput = {
       title: form.title,
       type: form.type,
-      starts_at: form.starts_at,
+      starts_at: form.starts_at || null,
       ends_at: form.ends_at || null,
       contact_id: form.contact_id || null,
       property_id: form.property_id || null,
@@ -424,12 +469,16 @@ function AppointmentDialog({
               </select>
             </label>
             <label className="block">
-              <span className="label">Inicio</span>
+              <span className="label">
+                {editing && !editing.starts_at
+                  ? "Inicio (vacío = contactar para agendar)"
+                  : "Inicio"}
+              </span>
               <input
                 type="datetime-local"
                 value={form.starts_at}
                 onChange={(e) => set("starts_at", e.target.value)}
-                required
+                required={state.mode === "new" || Boolean(editing?.starts_at)}
                 className="field"
               />
             </label>

@@ -218,7 +218,7 @@ export async function getDashboardData() {
     const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
     const nowIso = new Date().toISOString();
 
-    const [props, contacts, tasks, upcoming, recentContacts] =
+    const [props, contacts, tasks, upcoming, toSchedule, recentContacts] =
       await Promise.all([
         supabase.from("properties").select("status, featured"),
         supabase.from("contacts").select("stage, created_at"),
@@ -229,6 +229,13 @@ export async function getDashboardData() {
           .gte("starts_at", nowIso)
           .in("status", ["solicitud", "programada"])
           .order("starts_at", { ascending: true })
+          .limit(5),
+        supabase
+          .from("appointments")
+          .select("*, contact:contacts(full_name), property:properties(title)")
+          .is("starts_at", null)
+          .eq("status", "solicitud")
+          .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("contacts")
@@ -262,7 +269,10 @@ export async function getDashboardData() {
       tasks: {
         pending: taskRows.filter((t) => t.status !== "completada").length,
       },
-      upcoming: (upcoming.data as AppointmentRow[]) ?? [],
+      upcoming: [
+        ...((toSchedule.data as AppointmentRow[]) ?? []),
+        ...((upcoming.data as AppointmentRow[]) ?? []),
+      ].slice(0, 6),
       recentContacts: (recentContacts.data as ContactRow[]) ?? [],
     };
   } catch {

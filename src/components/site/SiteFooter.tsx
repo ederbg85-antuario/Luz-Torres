@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Mail, Instagram, MapPin } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { SITE, whatsappLink } from "@/lib/constants";
+import { SITE } from "@/lib/constants";
 import { WhatsAppIcon } from "./WhatsAppFab";
+import { WhatsAppCta } from "./WhatsAppPreset";
 import { TrackedLink } from "./TrackedLink";
 
 const PROPERTY_LINKS = [
@@ -74,17 +75,13 @@ export function SiteFooter() {
             <h3 className="eyebrow text-bruma">Contacto</h3>
             <ul className="mt-4 space-y-3">
               <li>
-                <TrackedLink
-                  href={whatsappLink()}
-                  event="contacto_whatsapp"
-                  params={{ ubicacion: "footer" }}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <WhatsAppCta
+                  ubicacion="footer"
                   className="flex items-center gap-2.5 text-sm text-bruma hover:text-hueso"
                 >
                   <WhatsAppIcon className="h-4 w-4 shrink-0" />
                   {SITE.phoneDisplay}
-                </TrackedLink>
+                </WhatsAppCta>
               </li>
               <li>
                 <TrackedLink

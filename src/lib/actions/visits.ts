@@ -11,6 +11,7 @@ import type {
   TakenSlot,
 } from "@/lib/types";
 import { createMetaEventId, sendMetaServerEvent } from "@/lib/meta-conversions";
+import { formatMexicanWhatsApp } from "@/lib/phone";
 
 // ─── Disponibilidad pública ─────────────────────────────────────
 
@@ -58,11 +59,12 @@ export async function fetchVisitAvailability(
 
 export type VisitRequestInput = {
   property_id: string;
-  preferred_date: string; // YYYY-MM-DD
-  preferred_time: string; // HH:mm
+  /** Si ambos vienen vacíos, la solicitud queda como "contactar para agendar". */
+  preferred_date?: string | null;
+  preferred_time?: string | null;
   full_name: string;
   phone: string;
-  email: string;
+  email?: string;
   financing: FinancingMethod;
   message: string;
   /** Honeypot anti-spam: si viene lleno, fingimos éxito. */
@@ -81,22 +83,26 @@ export async function requestVisit(
 ): Promise<VisitRequestResult> {
   if (input.company) return { ok: true };
 
-  if (!input.full_name.trim() || !input.phone.trim() || !input.email.trim()) {
+  const phone = formatMexicanWhatsApp(input.phone);
+  const email = input.email?.trim() ?? "";
+  if (input.full_name.trim().length < 2) {
+    return { ok: false, error: "Escribe tu nombre completo." };
+  }
+  if (!phone) {
     return {
       ok: false,
-      error: "Completa nombre, teléfono y correo para enviar la solicitud.",
+      error: "Escribe un WhatsApp de México de 10 dígitos. Puedes incluir +52.",
     };
   }
-  if (!input.preferred_date || !input.preferred_time) {
-    return { ok: false, error: "Elige la fecha y hora que prefieres." };
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())) {
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: "Escribe un correo electrónico válido." };
   }
-  if (!/^\d{10,15}$/.test(input.phone.replace(/\D/g, ""))) {
+  const preferredDate = input.preferred_date?.trim() || null;
+  const preferredTime = input.preferred_time?.trim() || null;
+  if (Boolean(preferredDate) !== Boolean(preferredTime)) {
     return {
       ok: false,
-      error: "Escribe un teléfono válido de 10 a 15 dígitos.",
+      error: "Si indicas una preferencia, necesito fecha y horario.",
     };
   }
   if (!isSupabaseConfigured()) {
@@ -111,11 +117,11 @@ export async function requestVisit(
     const supabase = createSupabasePublicClient();
     const { data, error } = await supabase.rpc("request_visit", {
       p_property_id: input.property_id,
-      p_preferred_date: input.preferred_date,
-      p_preferred_time: input.preferred_time,
+      p_preferred_date: preferredDate,
+      p_preferred_time: preferredTime,
       p_full_name: input.full_name.trim(),
-      p_phone: input.phone.trim() || null,
-      p_email: input.email.trim() || null,
+      p_phone: phone,
+      p_email: email || null,
       p_financing: input.financing,
       p_message: input.message.trim() || null,
     });
@@ -131,8 +137,8 @@ export async function requestVisit(
     await sendMetaServerEvent({
       eventName: "Lead",
       eventId,
-      email: input.email.trim(),
-      phone: input.phone.trim(),
+      email: email || undefined,
+      phone,
       contentName: "Solicitud de visita",
       contentCategory: "visit_request",
       contentIds: [input.property_id],

@@ -121,7 +121,7 @@ export interface Appointment {
   type: AppointmentType;
   contact_id: string | null;
   property_id: string | null;
-  starts_at: string;
+  starts_at: string | null;
   ends_at: string | null;
   location: string | null;
   notes: string | null;
