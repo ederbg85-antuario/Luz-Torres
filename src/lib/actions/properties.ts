@@ -57,7 +57,8 @@ async function uniqueSlug(
       .select("id")
       .eq("slug", candidate);
     if (excludeId) query = query.neq("id", excludeId);
-    const { data } = await query.maybeSingle();
+    const { data, error } = await query.maybeSingle();
+    if (error) throw error;
     if (!data) return candidate;
     n++;
   }
@@ -98,6 +99,12 @@ function toRow(input: PropertyInput) {
   };
 }
 
+function revalidatePublicInventory() {
+  // El layout del grupo cubre inicio, catálogo, categorías y fichas públicas.
+  revalidatePath("/(site)", "layout");
+  revalidatePath("/sitemap.xml");
+}
+
 export async function createProperty(
   input: PropertyInput
 ): Promise<ActionResult> {
@@ -120,7 +127,7 @@ export async function createProperty(
     if (error) throw error;
 
     revalidatePath("/admin/propiedades");
-    revalidatePath("/propiedades");
+    revalidatePublicInventory();
     return { ok: true, id: data.id, slug: data.slug };
   } catch (e) {
     return {
@@ -144,14 +151,19 @@ export async function updateProperty(
     } = await supabase.auth.getUser();
     if (!user) return { ok: false, error: "Tu sesión expiró." };
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("properties")
       .update(toRow(input))
-      .eq("id", id);
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
     if (error) throw error;
+    if (!data) {
+      return { ok: false, error: "No se encontró la propiedad para actualizar." };
+    }
 
     revalidatePath("/admin/propiedades");
-    revalidatePath("/propiedades");
+    revalidatePublicInventory();
     revalidatePath(`/admin/propiedades/${id}`);
     return { ok: true, id };
   } catch (e) {
@@ -165,13 +177,18 @@ export async function updateProperty(
 export async function deleteProperty(id: string): Promise<ActionResult> {
   try {
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("properties")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
     if (error) throw error;
+    if (!data) {
+      return { ok: false, error: "No se encontró la propiedad para eliminar." };
+    }
     revalidatePath("/admin/propiedades");
-    revalidatePath("/propiedades");
+    revalidatePublicInventory();
     return { ok: true };
   } catch (e) {
     return {

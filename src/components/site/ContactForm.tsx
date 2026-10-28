@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import {
   submitContactForm,
   type ContactFormState,
 } from "@/lib/actions/contact";
 import { CONTACT_INTEREST_LABELS } from "@/lib/constants";
-import { pushEvent } from "@/lib/gtm";
+import { confirmedLeadEventId, pushLeadEvent } from "@/lib/gtm";
 import { trackMetaEvent } from "@/lib/meta";
 import type { ContactInterest } from "@/lib/types";
 import { usePathname } from "next/navigation";
@@ -31,25 +31,29 @@ export function ContactForm({
     submitContactForm,
     INITIAL
   );
+  const trackedEventId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (state.status === "success" && state.eventId) {
-      pushEvent("generate_lead", {
-        interest: defaultInterest,
-        property_id: propertyId,
-        event_id: state.eventId,
+    const result = { status: state.status, eventId: state.eventId };
+    const eventId = confirmedLeadEventId(result);
+    if (eventId && state.interest && trackedEventId.current !== eventId) {
+      trackedEventId.current = eventId;
+      pushLeadEvent(result, "contact", {
+        interest: state.interest,
+        property_id: state.propertyId,
+        property_title: state.propertyId === propertyId ? propertyTitle : null,
       });
       trackMetaEvent(
         "ContactLead",
         {
-          content_name: `Contacto web · ${defaultInterest}`,
+          content_name: `Contacto web · ${state.interest}`,
           content_category: "contact_request",
-          ...(propertyId ? { content_ids: [propertyId], content_type: "product" } : {}),
+          ...(state.propertyId ? { content_ids: [state.propertyId], content_type: "product" } : {}),
         },
-        state.eventId
+        eventId
       );
     }
-  }, [state.status, state.eventId, defaultInterest, propertyId]);
+  }, [state.status, state.eventId, state.interest, state.propertyId, propertyId, propertyTitle]);
 
   if (state.status === "success") {
     return (

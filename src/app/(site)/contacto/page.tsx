@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Contacto",
   description:
     "Escríbele a Luz Torres para comprar, vender o rentar una propiedad en México. Asesoría sin prisa y sin compromiso.",
+  alternates: { canonical: "/contacto" },
 };
 
 export default async function ContactoPage({

@@ -4,6 +4,7 @@ import type { Property } from "@/lib/types";
 import { PROPERTY_TYPE_LABELS, statusBadge } from "@/lib/constants";
 import { cn, formatArea, formatPrice } from "@/lib/format";
 import { PropertyImage } from "./PropertyImage";
+import { propertyCover, propertyImageAlt } from "@/lib/property-media";
 
 function Spec({ icon: Icon, value }: { icon: typeof Maximize; value: string }) {
   return (
@@ -22,6 +23,7 @@ export function PropertyCard({
   index?: number;
 }) {
   const sold = property.status === "vendido" || property.status === "rentado";
+  const cover = propertyCover(property);
   const area = property.area_m2 || property.lot_m2 || 0;
 
   return (
@@ -32,9 +34,9 @@ export function PropertyCard({
       <div className="relative aspect-[16/10] overflow-hidden">
         <div className="relative h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.06]">
           <PropertyImage
-            src={property.cover_image}
+            src={cover}
             type={property.property_type}
-            alt={property.title}
+            alt={propertyImageAlt(cover, property.title)}
             index={index}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />

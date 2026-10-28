@@ -4,7 +4,8 @@ import { CategoryView } from "@/components/site/CategoryView";
 import { loadCategory } from "@/lib/category-loader";
 import { categoryMetadata } from "@/lib/seo";
 
-export const dynamicParams = false;
+export const dynamicParams = true;
+export const revalidate = 300;
 
 const load = () => loadCategory({ operation: "renta" });
 

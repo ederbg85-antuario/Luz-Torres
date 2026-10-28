@@ -14,6 +14,8 @@ export type ContactFormState = {
   status: "idle" | "success" | "error";
   message: string;
   eventId?: string;
+  interest?: ContactInterest;
+  propertyId?: string | null;
 };
 
 const INTERESTS: ContactInterest[] = ["compra", "renta", "venta", "inversion"];
@@ -96,5 +98,7 @@ export async function submitContactForm(
     message:
       "Gracias por escribir. Revisaré tu mensaje y te contactaré sin prisa, pero pronto.",
     eventId,
+    interest,
+    propertyId: propertyId || null,
   };
 }
