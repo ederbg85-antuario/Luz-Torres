@@ -21,6 +21,21 @@ function publicClient() {
   }
 }
 
+/** Bajas públicas solicitadas; conservar filas, estado e historial en el panel.
+ * Para republicar una ficha, retirar únicamente su ID de esta lista.
+ */
+const UNPUBLISHED_PROPERTY_IDS = [
+  "77ba4e00-c1d1-488b-b516-c14cbb72a060", // Bonito El Manzano
+  "2d68a9bf-2a1c-41bd-bfc2-7cc2e57c5adf", // Los Alpes
+] as const;
+
+/** Toda lectura pública excluye las bajas antes de ordenar o limitar. */
+function publicProperties<Columns extends string>(columns: Columns) {
+  let query = publicClient().from("properties").select(columns);
+  for (const id of UNPUBLISHED_PROPERTY_IDS) query = query.neq("id", id);
+  return query;
+}
+
 /** Un fallo del proveedor no debe publicarse como inventario vacío o un 404. */
 async function readPublicResult<T>(
   query: PromiseLike<{ data: T | null; error: unknown }>
@@ -44,11 +59,8 @@ async function readPublicRows<T>(
 
 /** Propiedades destacadas para la portada. */
 export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
-  const supabase = publicClient();
   return readPublicRows<Property>(
-    supabase
-      .from("properties")
-      .select("*")
+    publicProperties("*")
       .eq("featured", true)
       .order("created_at", { ascending: false })
       .limit(limit)
@@ -59,8 +71,7 @@ export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
 export async function getProperties(
   filters: PropertyFilters = {}
 ): Promise<Property[]> {
-  const supabase = publicClient();
-  let query = supabase.from("properties").select("*");
+  let query = publicProperties("*");
 
   if (filters.operation) query = query.eq("operation", filters.operation);
   if (filters.property_type)
@@ -100,11 +111,8 @@ export async function getProperties(
 export async function getPropertyBySlug(
   slug: string
 ): Promise<Property | null> {
-  const supabase = publicClient();
   return readPublicResult<Property>(
-    supabase
-      .from("properties")
-      .select("*")
+    publicProperties("*")
       .eq("slug", slug)
       .maybeSingle()
   );
@@ -115,11 +123,8 @@ export async function getRelatedProperties(
   property: Property,
   limit = 3
 ): Promise<Property[]> {
-  const supabase = publicClient();
   return readPublicRows<Property>(
-    supabase
-      .from("properties")
-      .select("*")
+    publicProperties("*")
       .eq("operation", property.operation)
       .eq("estado", property.estado)
       .neq("id", property.id)
@@ -132,11 +137,8 @@ export async function getFilterOptions(): Promise<{
   estados: string[];
   municipiosByEstado: Record<string, string[]>;
 }> {
-  const supabase = publicClient();
   const data = await readPublicRows<{ estado: string; municipio: string }>(
-    supabase
-      .from("properties")
-      .select("estado, municipio")
+    publicProperties("estado, municipio")
   );
 
   const map: Record<string, Set<string>> = {};
@@ -162,23 +164,17 @@ export async function getFilterOptions(): Promise<{
 export async function getSeoIndex(): Promise<
   Pick<Property, "operation" | "property_type" | "estado" | "municipio">[]
 > {
-  const supabase = publicClient();
   return readPublicRows<
     Pick<Property, "operation" | "property_type" | "estado" | "municipio">
   >(
-    supabase
-      .from("properties")
-      .select("operation, property_type, estado, municipio")
+    publicProperties("operation, property_type, estado, municipio")
   );
 }
 
 export async function getPropertySlugs(): Promise<
   { slug: string; updated_at: string }[]
 > {
-  const supabase = publicClient();
   return readPublicRows<{ slug: string; updated_at: string }>(
-    supabase
-      .from("properties")
-      .select("slug, updated_at")
+    publicProperties("slug, updated_at")
   );
 }
