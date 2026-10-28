@@ -89,16 +89,16 @@ const property = (id, extra = {}) => ({
 });
 
 function queryBuilder(respond) {
-  const state = { operation: "select", filters: [], columns: "*", single: false };
+  const state = { operation: "select", filters: [], excluded: [], limit: Infinity, columns: "*", single: false };
   const query = {
     select(columns) { state.columns = columns; return query; },
     eq(key, value) { state.filters.push([key, value]); return query; },
-    neq() { return query; },
+    neq(key, value) { state.excluded.push([key, value]); return query; },
     gte() { return query; },
     lte() { return query; },
     or() { return query; },
     order() { return query; },
-    limit() { return query; },
+    limit(value) { state.limit = value; return query; },
     insert(row) { state.operation = "insert"; state.row = row; return query; },
     update(row) { state.operation = "update"; state.row = row; return query; },
     delete() { state.operation = "delete"; return query; },
@@ -377,5 +377,85 @@ test("el sitemap falla completo ante el proveedor caído en cualquiera de sus do
     data[failingRead] = async () => { throw new Error("proveedor no disponible"); };
     const sitemap = loadTs("src/app/sitemap.ts", { "@/lib/data": data });
     await assert.rejects(() => sitemap.default(), /proveedor no disponible/);
+  }
+});
+
+
+const unpublished = [
+  property("77ba4e00-c1d1-488b-b516-c14cbb72a060", {
+    slug: "casa-venta-bonito-el-manzano-chicoloapan-iho8356137",
+    municipio: "Chicoloapan", featured: true,
+  }),
+  property("2d68a9bf-2a1c-41bd-bfc2-7cc2e57c5adf", {
+    slug: "departamento-venta-los-alpes-alvaro-obregon-iap7712491",
+    municipio: "Álvaro Obregón", property_type: "departamento", featured: true,
+  }),
+];
+
+function unpublishedEnvironment() {
+  // Ambas bajas encabezan el fixture para detectar filtros aplicados tras limit.
+  const inventory = [...unpublished, property("visible", { featured: true })];
+  const original = JSON.stringify(inventory);
+  const data = dataModule((request) => {
+    assert.equal(request.operation, "select", "las bajas nunca escriben ni borran");
+    for (const p of unpublished) {
+      assert.ok(request.excluded.some(([key, id]) => key === "id" && id === p.id));
+    }
+    const rows = inventory
+      .filter((p) => request.filters.every(([key, value]) => p[key] === value))
+      .filter((p) => request.excluded.every(([key, value]) => p[key] !== value))
+      .slice(0, request.limit)
+      .map((p) => request.columns === "*" ? p : Object.fromEntries(
+        request.columns.split(",").map((key) => [key.trim(), p[key.trim()]])
+      ));
+    return { data: request.single ? rows[0] ?? null : rows, error: null };
+  });
+  return { data, assertUnchanged: () => assert.equal(JSON.stringify(inventory), original) };
+}
+
+test("las dos bajas se excluyen de todas las lecturas públicas sin alterar otras fichas", async () => {
+  const { data, assertUnchanged } = unpublishedEnvironment();
+  for (const rows of [
+    await data.getProperties(),
+    await data.getFeaturedProperties(1),
+    await data.getRelatedProperties(property("actual"), 1),
+  ]) assert.deepEqual(Array.from(rows, (p) => p.id), ["visible"]);
+  for (const p of unpublished) assert.equal(await data.getPropertyBySlug(p.slug), null);
+  assert.equal((await data.getPropertyBySlug("propiedad-visible")).id, "visible");
+  assert.deepEqual(Array.from(await data.getPropertySlugs(), (p) => p.slug), ["propiedad-visible"]);
+  assert.deepEqual(Array.from(await data.getSeoIndex(), (p) => p.municipio), ["Pachuca de Soto"]);
+  const options = await data.getFilterOptions();
+  assert.deepEqual(Array.from(options.estados), ["Hidalgo"]);
+  assert.deepEqual(Array.from(options.municipiosByEstado.Hidalgo), ["Pachuca de Soto"]);
+  assertUnchanged();
+});
+
+test("el sitemap real omite las bajas y sus categorías exclusivas, conserva el resto", async () => {
+  const { data, assertUnchanged } = unpublishedEnvironment();
+  const sitemap = loadTs("src/app/sitemap.ts", { "@/lib/data": data });
+  const rows = await sitemap.default();
+  for (const p of unpublished) {
+    assert.equal(rows.some((r) => r.url.endsWith(`/propiedades/${p.slug}`)), false);
+  }
+  assert.equal(rows.some((r) => /chicoloapan|alvaro-obregon/.test(r.url)), false);
+  assert.ok(rows.some((r) => r.url.endsWith("/propiedades/propiedad-visible")));
+  assert.ok(rows.some((r) => r.url.endsWith("/propiedades/venta/casas/pachuca-de-soto")));
+  assertUnchanged();
+});
+
+test("la URL directa de cada baja alcanza notFound y no genera metadatos de propiedad", async () => {
+  const { data } = unpublishedEnvironment();
+  const path = "src/app/(site)/propiedades/[slug]/page.tsx";
+  const source = ts.createSourceFile(path, readFileSync(resolve(root, path), "utf8"), ts.ScriptTarget.Latest);
+  const mocks = Object.fromEntries(source.statements
+    .filter(ts.isImportDeclaration)
+    .map((node) => [node.moduleSpecifier.text, {}]));
+  mocks["@/lib/data"] = data;
+  mocks["next/navigation"] = { notFound: () => { throw new Error("404"); } };
+  const page = loadTs(path, mocks);
+  for (const p of unpublished) {
+    const args = { params: Promise.resolve({ slug: p.slug }) };
+    await assert.rejects(() => page.default(args), /404/);
+    assert.equal((await page.generateMetadata(args)).title, "Propiedad no encontrada");
   }
 });
