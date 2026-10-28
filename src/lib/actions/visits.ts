@@ -10,7 +10,9 @@ import type {
   FinancingMethod,
   TakenSlot,
 } from "@/lib/types";
-import { createMetaEventId, sendMetaServerEvent } from "@/lib/meta-conversions";
+import { sendMetaServerEvent } from "@/lib/meta-conversions";
+import { isLeadRetryConflict, persistWebLead } from "@/lib/lead-persistence";
+import type { LeadSubmissionContext } from "@/lib/acquisition";
 import { formatMexicanWhatsApp } from "@/lib/phone";
 
 // ─── Disponibilidad pública ─────────────────────────────────────
@@ -70,12 +72,15 @@ export type VisitRequestInput = {
   /** Honeypot anti-spam: si viene lleno, fingimos éxito. */
   company?: string;
   source_url?: string;
+  lead_context?: LeadSubmissionContext;
 };
 
 export type VisitRequestResult = {
   ok: boolean;
   error?: string;
   eventId?: string;
+  leadId?: string;
+  retryConflict?: boolean;
 };
 
 export async function requestVisit(
@@ -115,26 +120,14 @@ export async function requestVisit(
 
   try {
     const supabase = createSupabasePublicClient();
-    const { data, error } = await supabase.rpc("request_visit", {
-      p_property_id: input.property_id,
-      p_preferred_date: preferredDate,
-      p_preferred_time: preferredTime,
-      p_full_name: input.full_name.trim(),
-      p_phone: phone,
-      p_email: email || null,
-      p_financing: input.financing,
-      p_message: input.message.trim() || null,
-    });
-    if (error) throw error;
-    const result = data as { ok: boolean; error?: string };
-    if (!result?.ok) {
-      return {
-        ok: false,
-        error: result?.error ?? "No se pudo registrar la solicitud.",
-      };
-    }
-    const eventId = createMetaEventId();
-    await sendMetaServerEvent({
+    const saved = await persistWebLead(supabase, {
+      lead_type: "visit", property_id: input.property_id,
+      preferred_date: preferredDate, preferred_time: preferredTime,
+      full_name: input.full_name.trim(), phone, email: email || null,
+      financing: input.financing, message: input.message.trim() || null,
+    }, input.lead_context);
+    const eventId = saved.eventId;
+    if (saved.created) await sendMetaServerEvent({
       eventName: "Lead",
       eventId,
       email: email || undefined,
@@ -144,8 +137,9 @@ export async function requestVisit(
       contentIds: [input.property_id],
       sourceUrl: input.source_url,
     });
-    return { ok: true, eventId };
-  } catch {
+    return { ok: true, eventId, leadId: saved.leadId };
+  } catch (error) {
+    if (isLeadRetryConflict(error)) return { ok: false, retryConflict: true, error: "La solicitud anterior ya se recibió. Estos datos son distintos; puedes enviarlos como una nueva solicitud." };
     return {
       ok: false,
       error:

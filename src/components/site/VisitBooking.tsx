@@ -16,6 +16,7 @@ import { FINANCING_LABELS, FINANCING_OPTIONS } from "@/lib/constants";
 import { formatMexicanWhatsApp } from "@/lib/phone";
 import type { FinancingMethod, Operation } from "@/lib/types";
 import { cn, formatPrice } from "@/lib/format";
+import { finishLeadSubmission, getLeadSubmission } from "@/lib/acquisition-browser";
 
 const OPEN_EVENT = "lt:open-visit-booking";
 
@@ -131,6 +132,7 @@ function VisitRequestModal({
   });
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [retryConflict, setRetryConflict] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
   const trackedEventId = useRef<string | null>(null);
   const submitting = useRef(false);
@@ -171,6 +173,8 @@ function VisitRequestModal({
     }
 
     submitting.current = true;
+    if (retryConflict) finishLeadSubmission(`visit:${propertyId}`);
+    setRetryConflict(false);
     setPending(true);
     setError("");
     try {
@@ -183,9 +187,11 @@ function VisitRequestModal({
         message: form.message,
         company: form.company,
         source_url: `${window.location.origin}${window.location.pathname}`,
+        lead_context: getLeadSubmission(`visit:${propertyId}`),
       });
 
       if (!result.ok) {
+        setRetryConflict(result.retryConflict === true);
         setError(
           result.error ?? "No pude enviar tu solicitud. Intenta de nuevo.",
         );
@@ -193,6 +199,7 @@ function VisitRequestModal({
       }
 
       const eventId = confirmedLeadEventId(result);
+      if (eventId) finishLeadSubmission(`visit:${propertyId}`);
       if (eventId && trackedEventId.current !== eventId) {
         trackedEventId.current = eventId;
         pushLeadEvent(result, "visit", {
@@ -258,7 +265,7 @@ function VisitRequestModal({
         </div>
 
         {done ? (
-          <div className="px-5 py-8 text-center sm:px-6">
+          <div role="status" className="px-5 py-8 text-center sm:px-6">
             <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-almendra/15 text-nogal">
               <CheckCircle2 className="h-7 w-7" />
             </span>
@@ -336,16 +343,17 @@ function VisitRequestModal({
                   </label>
                 </div>
                 {operation === "venta" && (
-                  <div>
-                    <span className="label flex items-center gap-1.5">
+                  <fieldset>
+                    <legend className="label flex items-center gap-1.5">
                       <Wallet className="h-3.5 w-3.5 text-nogal" />
                       ¿Cómo planeas financiar la compra?
-                    </span>
+                    </legend>
                     <div className="grid gap-2 sm:grid-cols-2">
                       {FINANCING_OPTIONS.map((option) => (
                         <button
                           key={option}
                           type="button"
+                          aria-pressed={form.financing === option}
                           onClick={() => set("financing", option)}
                           className={cn(
                             "rounded-md border px-3 py-2.5 text-left text-[13px] font-medium transition-all",
@@ -358,7 +366,7 @@ function VisitRequestModal({
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </fieldset>
                 )}
                 <label className="block">
                   <span className="label">Mensaje (opcional)</span>
@@ -373,7 +381,7 @@ function VisitRequestModal({
               </div>
 
               {error && (
-                <p className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                <p role="alert" className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
                   {error}
                 </p>
               )}
@@ -385,7 +393,7 @@ function VisitRequestModal({
                 disabled={pending}
                 className="btn-primary w-full py-3"
               >
-                {pending ? "Enviando…" : "Quiero que me contacten para agendar"}
+                {pending ? "Enviando…" : retryConflict ? "Enviar como nueva solicitud" : "Quiero que me contacten para agendar"}
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>

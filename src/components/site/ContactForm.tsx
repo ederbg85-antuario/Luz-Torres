@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import {
   submitContactForm,
@@ -12,6 +12,8 @@ import { trackMetaEvent } from "@/lib/meta";
 import type { ContactInterest } from "@/lib/types";
 import { usePathname } from "next/navigation";
 import { SITE_URL } from "@/lib/supabase/config";
+import { attachLeadSubmission, finishLeadSubmission } from "@/lib/acquisition-browser";
+import { preserveFormDraft } from "@/lib/form-draft";
 
 const INITIAL: ContactFormState = { status: "idle", message: "" };
 
@@ -27,11 +29,30 @@ export function ContactForm({
   compact?: boolean;
 }) {
   const pathname = usePathname();
+  const submissionKey = `contact:${pathname}:${propertyId ?? "general"}`;
   const [state, action, pending] = useActionState(
-    submitContactForm,
+    async (previous: ContactFormState, data: FormData) => {
+      if (previous.retryConflict) finishLeadSubmission(submissionKey);
+      attachLeadSubmission(data, submissionKey);
+      try {
+        const result = await submitContactForm(previous, data);
+        if (result.status === "success" && result.eventId) finishLeadSubmission(submissionKey);
+        return result;
+      } catch {
+        return { status: "error", message: "No pude confirmar el envío. Intenta de nuevo con los mismos datos." } satisfies ContactFormState;
+      }
+    },
     INITIAL
   );
+  const [draft, setDraft] = useState({
+    full_name: "", phone: "", email: "", interest: defaultInterest,
+    message: "", company: "",
+  });
   const trackedEventId = useRef<string | null>(null);
+
+  function setField<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
+    setDraft((current) => ({ ...current, [key]: value }));
+  }
 
   useEffect(() => {
     const result = { status: state.status, eventId: state.eventId };
@@ -57,7 +78,7 @@ export function ContactForm({
 
   if (state.status === "success") {
     return (
-      <div className="rounded-xl bg-almendra/15 p-6 text-center">
+      <div role="status" className="rounded-xl bg-almendra/15 p-6 text-center">
         <CheckCircle2 className="mx-auto h-9 w-9 text-nogal" />
         <p className="mt-3 font-semibold text-nogal">Mensaje enviado</p>
         <p className="mt-1 text-sm text-humo">{state.message}</p>
@@ -66,7 +87,7 @@ export function ContactForm({
   }
 
   return (
-    <form action={action} className="space-y-3.5">
+    <form ref={preserveFormDraft} action={action} className="space-y-3.5">
       <input type="hidden" name="source_url" value={`${SITE_URL}${pathname}`} />
       {propertyId && (
         <input type="hidden" name="property_id" value={propertyId} />
@@ -75,6 +96,8 @@ export function ContactForm({
       <input
         type="text"
         name="company"
+        value={draft.company}
+        onChange={(event) => setField("company", event.target.value)}
         tabIndex={-1}
         autoComplete="off"
         className="hidden"
@@ -92,6 +115,8 @@ export function ContactForm({
           <span className="label">Nombre completo</span>
           <input
             name="full_name"
+            value={draft.full_name}
+            onChange={(event) => setField("full_name", event.target.value)}
             required
             className="field"
             placeholder="Tu nombre"
@@ -101,6 +126,8 @@ export function ContactForm({
           <span className="label">Teléfono / WhatsApp</span>
           <input
             name="phone"
+            value={draft.phone}
+            onChange={(event) => setField("phone", event.target.value)}
             required
             className="field"
             placeholder="55 0000 0000"
@@ -112,6 +139,8 @@ export function ContactForm({
         <span className="label">Correo electrónico</span>
           <input
             name="email"
+            value={draft.email}
+            onChange={(event) => setField("email", event.target.value)}
             type="email"
             required
           className="field"
@@ -123,7 +152,8 @@ export function ContactForm({
         <span className="label">Me interesa</span>
         <select
           name="interest"
-          defaultValue={defaultInterest}
+          value={draft.interest}
+          onChange={(event) => setField("interest", event.target.value as ContactInterest)}
           className="field"
         >
           {(
@@ -140,6 +170,8 @@ export function ContactForm({
         <span className="label">Mensaje</span>
         <textarea
           name="message"
+          value={draft.message}
+          onChange={(event) => setField("message", event.target.value)}
           rows={compact ? 3 : 4}
           className="field resize-none"
           placeholder="Cuéntame qué buscas y en qué te puedo ayudar."
@@ -147,7 +179,7 @@ export function ContactForm({
       </label>
 
       {state.status === "error" && (
-        <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <p role="alert" className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
           {state.message}
         </p>
       )}
@@ -162,7 +194,7 @@ export function ContactForm({
         ) : (
           <>
             <Send className="h-4 w-4" />
-            Enviar mensaje
+            {state.retryConflict ? "Enviar como nueva solicitud" : "Enviar mensaje"}
           </>
         )}
       </button>

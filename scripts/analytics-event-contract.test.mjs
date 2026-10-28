@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as formDraft from '../src/lib/form-draft.ts';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
@@ -54,10 +55,11 @@ function componentHarness({ state = { status: 'idle', message: '' }, stateOverri
   let cursor = 0;
   let effects = [];
   let currentState = state;
+  let formAction;
   const slots = [];
   const meta = [];
   const react = {
-    useActionState() { cursor++; return [currentState, () => {}, false]; },
+    useActionState(action) { cursor++; formAction = action; return [currentState, () => {}, false]; },
     useRef(initial) { const index = cursor++; return slots[index] ??= { current: initial }; },
     useState(initial) {
       const index = cursor++;
@@ -70,6 +72,11 @@ function componentHarness({ state = { status: 'idle', message: '' }, stateOverri
     react, 'react/jsx-runtime': { jsx, jsxs: jsx, Fragment: 'Fragment' }, 'lucide-react': icons,
     '@/lib/gtm': analytics,
     '@/lib/phone': phone,
+    '@/lib/form-draft': formDraft,
+    '@/lib/acquisition-browser': {
+      attachLeadSubmission() {}, finishLeadSubmission() {},
+      getLeadSubmission: () => ({ submission_id: randomUUID(), retry_token: randomUUID(), acquisition: {} }),
+    },
     '@/lib/meta': { trackMetaEvent: (...args) => meta.push(args) },
     '@/lib/constants': {
       CONTACT_INTEREST_LABELS: { compra: 'Compra', renta: 'Renta', venta: 'Venta', inversion: 'Inversión' },
@@ -87,6 +94,7 @@ function componentHarness({ state = { status: 'idle', message: '' }, stateOverri
   return {
     meta, slots,
     setResult(value) { currentState = value; },
+    runFormAction: (data) => formAction(currentState, data),
     load: (name) => loadSource(`components/site/${name}.tsx`, dependencies, { fetch }),
     render(Component, props = {}) {
       cursor = 0; effects = [];
@@ -112,6 +120,11 @@ function actionHarness({ insertError = null, configured = true } = {}) {
   const stored = [];
   const sent = [];
   const deps = {
+    '@/lib/lead-persistence': { isLeadRetryConflict: () => false, persistWebLead: async (_client, payload) => {
+      if (insertError) throw insertError;
+      stored.push(payload);
+      return { ok: true, created: true, eventId: 'server-event-1', leadId: 'lead-1', interest: payload.interest, propertyId: payload.property_id ?? null };
+    } },
     '@/lib/supabase/public': {
       isSupabaseConfigured: () => configured,
       createSupabasePublicClient: () => ({ from: (table) => ({ insert: async (row) => {
@@ -269,6 +282,68 @@ test('seller UI distinguishes seller and clears property context with replay gua
   assert.equal(event.property_id, null); assert.equal(harness.meta[0][0], 'SellerLead'); assert.equal(harness.meta[0][2], event.event_id);
 });
 
+test('contact and seller network rejection stays inline, preserves retry context and emits no success',async()=>{
+  for(const [name,fn]of [['ContactForm','submitContactForm'],['SellerForm','submitSellerForm']]){
+    const calls=[];const path=name==='ContactForm'?'contact':'seller';
+    const harness=componentHarness({actions:{
+      [`@/lib/actions/${path}`]:{[fn]:async()=>{throw Error('Mock response lost');}},
+      '@/lib/acquisition-browser':{attachLeadSubmission:()=>calls.push('attach'),finishLeadSubmission:()=>calls.push('finish')},
+    }});
+    const module=harness.load(name);harness.render(module[name]);
+    const result=await harness.runFormAction(new FormData());
+    assert.equal(result.status,'error');assert.equal(result.eventId,undefined);assert.deepEqual(calls,['attach']);
+    harness.setResult(result);harness.render(module[name]);assert.equal(browser.dataLayer.length,0);assert.equal(harness.meta.length,0);
+  }
+});
+
+for (const [name, actionName, extra] of [
+  ['ContactForm', 'submitContactForm', { interest: 'renta' }],
+  ['SellerForm', 'submitSellerForm', { property_type: 'Departamento', location: 'Zona QA', estimated_value: '$3,500,000' }],
+]) {
+  test(`${name} retains its controlled draft after server error, lost response and retry conflict`, async () => {
+    const values = { full_name: 'A', email: 'qa@example.test', phone: '5500000000', message: 'Borrador privado de QA', ...extra };
+    for (const failure of [{ status: 'error', message: 'Rejected by server' }, new Error('Response lost'), { status: 'error', message: 'Changed payload', retryConflict: true }]) {
+      const actionPath = name === 'ContactForm' ? 'contact' : 'seller';
+      const harness = componentHarness({ actions: { [`@/lib/actions/${actionPath}`]: { [actionName]: async () => {
+        if (failure instanceof Error) throw failure;
+        return failure;
+      } } } });
+      const Component = harness.load(name)[name];
+      const props = name === 'ContactForm' ? { defaultInterest: 'compra' } : {};
+      let tree = harness.render(Component, props);
+      for (const [field, value] of Object.entries(values)) {
+        const node = findNode(tree, (item) => item.props?.name === field);
+        assert.ok(node, field); assert.equal(typeof node.props.onChange, 'function', field);
+        node.props.onChange({ target: { value } });
+      }
+      tree = harness.render(Component, props);
+      const body = new FormData();
+      for (const [field, value] of Object.entries(values)) body.set(field, value);
+      const result = await harness.runFormAction(body);
+      assert.equal(result.status, 'error');
+      harness.setResult(result);
+      tree = harness.render(Component, props);
+      for (const [field, value] of Object.entries(values)) {
+        const node = findNode(tree, (item) => item.props?.name === field);
+        assert.equal(node.props.value, value, `${field} must survive React action reset`);
+        assert.equal(Object.hasOwn(node.props, 'defaultValue'), false, field);
+      }
+      assert.equal(browser.dataLayer.length, 0); assert.equal(harness.meta.length, 0);
+    }
+  });
+}
+
+test('explicit new submission after an acknowledged payload conflict rotates context before sending',async()=>{
+  const calls=[];
+  const harness=componentHarness({state:{status:'error',message:'Already received',retryConflict:true},actions:{
+    '@/lib/actions/contact':{submitContactForm:async()=>{calls.push('submit');return {status:'success',message:'OK',eventId:'new-event',interest:'compra'};}},
+    '@/lib/acquisition-browser':{attachLeadSubmission:()=>calls.push('attach'),finishLeadSubmission:()=>calls.push('finish')},
+  }});
+  const {ContactForm}=harness.load('ContactForm');harness.render(ContactForm);
+  const result=await harness.runFormAction(new FormData());
+  assert.equal(result.status,'success');assert.deepEqual(calls,['finish','attach','submit','finish']);
+});
+
 test('WhatsApp preserves href and shares one click ID with Meta/CAPI; global CTA clears context', () => {
   const requests = [];
   const harness = componentHarness({ fetch: async (url, options) => { requests.push({ url, body: JSON.parse(options.body) }); return {}; } });
@@ -354,6 +429,11 @@ test('current visit server accepts WhatsApp-only contact with null dates and sha
   const requests = []; const meta = [];
   const { requestVisit } = loadSource('lib/actions/visits.ts', {
     '@/lib/phone': phone,
+    '@/lib/lead-persistence': { isLeadRetryConflict: () => false, persistWebLead: async (client, payload) => {
+      const { error } = await client.rpc('submit_web_lead', { p_payload: payload });
+      if (error) throw error;
+      return { ok: true, created: true, eventId: 'visit-server-1', leadId: 'lead-1', interest: 'compra', propertyId: payload.property_id };
+    } },
     '@/lib/supabase/public': {
       isSupabaseConfigured: () => true,
       createSupabasePublicClient: () => ({ rpc: async (name, params) => {
@@ -367,9 +447,9 @@ test('current visit server accepts WhatsApp-only contact with null dates and sha
   });
   const result = await requestVisit({ property_id: 'property-a', full_name: 'Persona QA', phone: '+52 55 0000 0000', financing: 'por_definir', message: '' });
   assert.equal(result.ok, true); assert.equal(result.eventId, 'visit-server-1');
-  assert.equal(requests.length, 1); assert.equal(requests[0].name, 'request_visit');
-  assert.equal(requests[0].params.p_phone, '+525500000000');
-  for (const key of ['p_email', 'p_preferred_date', 'p_preferred_time']) assert.equal(requests[0].params[key], null);
+  assert.equal(requests.length, 1); assert.equal(requests[0].name, 'submit_web_lead');
+  assert.equal(requests[0].params.p_payload.phone, '+525500000000');
+  for (const key of ['email', 'preferred_date', 'preferred_time']) assert.equal(requests[0].params.p_payload[key], null);
   assert.equal(meta[0].eventId, result.eventId); assert.equal(meta[0].email, undefined);
 });
 

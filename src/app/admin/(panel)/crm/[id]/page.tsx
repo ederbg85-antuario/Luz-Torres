@@ -5,12 +5,14 @@ import {
   getContact,
   getPropertyOptions,
   getAppointments,
+  getLeadAttributions,
 } from "@/lib/admin-data";
 import { deleteContact } from "@/lib/actions/contacts";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { ContactEditor } from "@/components/admin/ContactEditor";
 import { Badge } from "@/components/ui/Badge";
+import { LeadAttributionCard } from "@/components/admin/LeadAttributionCard";
 import {
   APPOINTMENT_TYPE_LABELS,
   CONTACT_INTEREST_LABELS,
@@ -34,10 +36,11 @@ export default async function ContactDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [contact, properties, allAppointments] = await Promise.all([
+  const [contact, properties, allAppointments, attributions] = await Promise.all([
     getContact(id),
     getPropertyOptions(),
     getAppointments(),
+    getLeadAttributions(id),
   ]);
   if (!contact) notFound();
 
@@ -72,6 +75,7 @@ export default async function ContactDetailPage({
         </div>
 
         <aside className="space-y-4">
+          <LeadAttributionCard leadId={id} available={attributions.available} receipt={attributions.receipts[0]} />
           {/* Resumen */}
           <div className="rounded-xl bg-papel p-5 shadow-soft">
             <h3 className="text-sm font-semibold text-carbon">Resumen</h3>

@@ -31,3 +31,6 @@ yarn-error.log*
 # vercel
 .vercel
 .env*
+
+# Supabase CLI local cache (migration sources remain tracked)
+supabase/.temp/

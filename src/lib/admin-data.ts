@@ -1,4 +1,5 @@
 import "server-only";
+import type { LeadAttribution } from "./lead-attribution-report";
 import { createSupabaseServerClient } from "./supabase/server";
 import type {
   Appointment,
@@ -51,6 +52,21 @@ export async function getAdminProperty(id: string): Promise<Property | null> {
 }
 
 // ─── Contactos / CRM ────────────────────────────────────────────
+/** Team RLS only. Explicit columns never send retry/fingerprint hashes to UI. */
+export async function getLeadAttributions(contactId: string | string[]): Promise<{ available: boolean; receipts: LeadAttribution[] }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    let query = supabase.from("lead_submissions").select("contact_id,event_id,lead_type,acquisition,created_at");
+    if (Array.isArray(contactId)) {
+      if (!contactId.length) return { available: true, receipts: [] };
+      query = query.in("contact_id", contactId);
+    } else query = query.eq("contact_id", contactId);
+    const { data, error } = await query;
+    if (error) return { available: false, receipts: [] };
+    return { available: true, receipts: (data as LeadAttribution[]) ?? [] };
+  } catch { return { available: false, receipts: [] }; }
+}
+
 export async function getContacts(): Promise<ContactRow[]> {
   try {
     const supabase = await createSupabaseServerClient();

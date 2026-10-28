@@ -1,11 +1,13 @@
 import Script from "next/script";
 import { GTM_ID } from "@/lib/constants";
 import { MetaPixel } from "./MetaPixel";
+import { AcquisitionCapture } from "./AcquisitionCapture";
 
 /** Integraciones de medición exclusivas del sitio público. */
 export function PublicTracking() {
   return (
     <>
+      <AcquisitionCapture />
       {GTM_ID && (
         <>
           <Script id="gtm" strategy="afterInteractive">
