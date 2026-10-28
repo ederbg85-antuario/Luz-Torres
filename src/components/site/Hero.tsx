@@ -4,12 +4,15 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import type { Property } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
 import { SearchBar } from "./SearchBar";
+import { propertyCover, propertyImageAlt } from "@/lib/property-media";
 
 export function Hero({ properties }: { properties: Property[] }) {
   const main =
     properties.find((p) => p.slug.includes("los-alpes")) ?? properties[0];
   const secondary =
     properties.find((p) => p.slug.includes("el-manzano")) ?? properties[1];
+  const mainCover = main ? propertyCover(main) : null;
+  const secondaryCover = secondary ? propertyCover(secondary) : null;
   return (
     <section className="lt-container pb-6 pt-7 sm:pt-12">
       <div className="grid items-center gap-9 lg:grid-cols-[.95fr_1.05fr] lg:gap-14">
@@ -41,8 +44,8 @@ export function Hero({ properties }: { properties: Property[] }) {
             className="group relative block aspect-[5/4] overflow-hidden rounded-2xl bg-petroleo shadow-elevated sm:aspect-[6/5] lg:aspect-[.93]"
           >
             <Image
-              src={main?.cover_image ?? "/luz-outdoor.jpg"}
-              alt={main?.title ?? "Luz Torres, asesora inmobiliaria"}
+              src={mainCover ?? "/luz-outdoor.jpg"}
+              alt={propertyImageAlt(mainCover, main?.title ?? "Luz Torres, asesora inmobiliaria")}
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 52vw"
@@ -74,8 +77,8 @@ export function Hero({ properties }: { properties: Property[] }) {
             >
               <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md">
                 <Image
-                  src={secondary.cover_image ?? "/luz-keys.jpg"}
-                  alt={secondary.title}
+                  src={secondaryCover ?? "/luz-keys.jpg"}
+                  alt={propertyImageAlt(secondaryCover, secondary.title)}
                   fill
                   sizes="96px"
                   className="object-cover"

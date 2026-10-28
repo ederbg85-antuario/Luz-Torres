@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import { submitSellerForm, type SellerFormState } from "@/lib/actions/seller";
-import { pushEvent } from "@/lib/gtm";
+import { confirmedLeadEventId, pushLeadEvent } from "@/lib/gtm";
 import { trackMetaEvent } from "@/lib/meta";
 
 const INITIAL: SellerFormState = { status: "idle", message: "" };
@@ -20,20 +20,20 @@ const PROPERTY_TYPES = [
 
 export function SellerForm() {
   const [state, action, pending] = useActionState(submitSellerForm, INITIAL);
+  const trackedEventId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (state.status !== "success" || !state.eventId) return;
+    const result = { status: state.status, eventId: state.eventId };
+    const eventId = confirmedLeadEventId(result);
+    if (!eventId || trackedEventId.current === eventId) return;
+    trackedEventId.current = eventId;
     // Reutiliza la conversión de GA4 ya publicada para todos los prospectos
     // y conserva el tipo de interés para distinguir a quien desea vender.
-    pushEvent("generate_lead", {
-      event_id: state.eventId,
-      interest: "venta",
-      lead_type: "seller",
-    });
+    pushLeadEvent(result, "seller");
     trackMetaEvent(
       "SellerLead",
       { content_name: "Solicitud para vender propiedad", content_category: "seller_request" },
-      state.eventId
+      eventId
     );
   }, [state.eventId, state.status]);
 

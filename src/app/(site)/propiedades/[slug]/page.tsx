@@ -11,7 +11,6 @@ import {
   MapPin,
   MessageCircle,
   CalendarDays,
-  ArrowLeft,
   ChevronDown,
   ArrowUpRight,
 } from "lucide-react";
@@ -32,7 +31,12 @@ import {
 } from "@/lib/constants";
 import { amenityIcon } from "@/lib/amenity-icons";
 import { formatArea, formatPrice } from "@/lib/format";
-import { propertyJsonLd, propertyMetadata } from "@/lib/seo";
+import { propertyBreadcrumb, propertyJsonLd, propertyMetadata } from "@/lib/seo";
+import { serializeJsonLd } from "@/lib/json-ld";
+import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { propertyImages, propertyImageAlt } from "@/lib/property-media";
+
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -52,12 +56,7 @@ export default async function PropertyDetailPage({
   const property = await getPropertyBySlug((await params).slug);
   if (!property) notFound();
   const related = await getRelatedProperties(property);
-  const images = [
-    ...new Set([
-      ...(property.cover_image ? [property.cover_image] : []),
-      ...(property.images ?? []),
-    ]),
-  ];
+  const images = propertyImages(property);
   const specs = [
     {
       icon: Maximize,
@@ -137,7 +136,7 @@ export default async function PropertyDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(propertyJsonLd(property, images)),
+          __html: serializeJsonLd(propertyJsonLd(property, images)),
         }}
       />
       <PropertyWhatsAppPreset
@@ -151,25 +150,18 @@ export default async function PropertyDetailPage({
         price={property.price}
         operation={property.operation}
       />
-      <nav
-        aria-label="Ruta de navegación"
-        className="flex items-center justify-between gap-3 text-sm"
-      >
-        <Link
-          href="/propiedades"
-          className="inline-flex items-center gap-2 text-humo hover:text-petroleo"
-        >
-          <ArrowLeft size={16} />
-          Todas las propiedades
-        </Link>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1 basis-72">
+          <Breadcrumbs items={propertyBreadcrumb(property)} />
+        </div>
         <span className="rounded-full bg-petroleo px-3 py-1.5 text-xs font-semibold text-white">
           {statusBadge(property.operation, property.status)}
         </span>
-      </nav>
+      </div>
       <header className="mb-7 mt-7">
         <p className="eyebrow">{name}</p>
         <h1 className="mt-3 text-3xl font-medium leading-tight tracking-[-.03em] sm:text-4xl lg:text-[44px]">
-          {property.colonia || property.title}
+          {property.title}
         </h1>
         <p className="mt-3 flex items-center gap-2 text-sm text-humo">
           <MapPin size={16} className="shrink-0 text-almendra" />
@@ -183,6 +175,7 @@ export default async function PropertyDetailPage({
         <div className="min-w-0">
           <PropertyGallery
             images={images}
+            imageAlts={images.map((src) => propertyImageAlt(src, property.title))}
             type={property.property_type}
             title={property.title}
           />
@@ -244,7 +237,7 @@ export default async function PropertyDetailPage({
             </section>
           )}
           {property.description && (
-            <details className="mt-6 rounded-xl bg-white p-6 shadow-soft">
+            <details open className="mt-6 rounded-xl bg-white p-6 shadow-soft">
               <summary className="flex items-center justify-between gap-3 text-lg font-semibold">
                 Descripción y detalles
                 <ChevronDown size={20} className="details-chevron text-nogal" />

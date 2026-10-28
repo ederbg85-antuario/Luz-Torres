@@ -34,11 +34,11 @@ export function TrackedLink({
       aria-label={ariaLabel}
       className={className}
       onClick={() => {
-        pushEvent(event, params);
+        const eventId = crypto.randomUUID();
+        const propertyId = typeof params?.property_id === "string" ? params.property_id : undefined;
+        const placement = typeof params?.ubicacion === "string" ? params.ubicacion : undefined;
+        pushEvent(event, { ...params, event_id: eventId });
         if (event === "contacto_whatsapp") {
-          const eventId = crypto.randomUUID();
-          const propertyId = typeof params?.property_id === "string" ? params.property_id : undefined;
-          const placement = typeof params?.ubicacion === "string" ? params.ubicacion : undefined;
           trackMetaEvent("Contact", {
             content_name: "WhatsApp",
             content_category: "whatsapp_click",
@@ -55,8 +55,9 @@ export function TrackedLink({
         } else if (event.startsWith("contacto_")) {
           trackMetaEvent("Contact", {
             content_name: event.replace("contacto_", ""),
-            ...params,
-          });
+            ...(propertyId ? { content_ids: [propertyId], content_type: "product" } : {}),
+            ...(placement ? { ubicacion: placement } : {}),
+          }, eventId);
         }
       }}
     >

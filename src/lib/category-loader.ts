@@ -30,10 +30,9 @@ export async function loadCategory(parts: {
   if (!descriptor) return null;
 
   const properties = await getProperties(categoryFilters(descriptor));
+  if (properties.length === 0) return null;
   const related = relatedCategories(index, descriptor);
-  const minPrice = properties.length
-    ? Math.min(...properties.map((p) => p.price))
-    : null;
+  const minPrice = Math.min(...properties.map((p) => p.price));
 
   return { descriptor, properties, related, minPrice };
 }

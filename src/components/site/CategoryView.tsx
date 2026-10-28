@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { ChevronRight, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 import type { Property } from "@/lib/types";
 import type {
   CategoryDescriptor,
   CategoryLink,
 } from "@/lib/seo";
 import { categoryBreadcrumb, categoryJsonLd } from "@/lib/seo";
+import { serializeJsonLd } from "@/lib/json-ld";
+import { localSalesContent } from "@/lib/local-sales-content";
+import { Breadcrumbs } from "./Breadcrumbs";
 import { PropertyCard } from "./PropertyCard";
 
 export function CategoryView({
@@ -18,38 +21,31 @@ export function CategoryView({
   related: CategoryLink[];
 }) {
   const crumbs = categoryBreadcrumb(descriptor);
+  const editorial = localSalesContent(descriptor, properties);
 
   return (
     <div className="lt-container py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(categoryJsonLd(descriptor, properties)),
+          __html: serializeJsonLd(
+            categoryJsonLd(
+              editorial ? { ...descriptor, intro: editorial.intro } : descriptor,
+              properties,
+            ),
+          ),
         }}
       />
 
       {/* Breadcrumb */}
-      <nav className="flex flex-wrap items-center gap-1.5 text-[13px] text-humo">
-        {crumbs.map((c, i) => (
-          <span key={c.path} className="flex items-center gap-1.5">
-            {i > 0 && <ChevronRight className="h-3.5 w-3.5" />}
-            {i < crumbs.length - 1 ? (
-              <Link href={c.path} className="hover:text-carbon">
-                {c.name}
-              </Link>
-            ) : (
-              <span className="text-carbon">{c.name}</span>
-            )}
-          </span>
-        ))}
-      </nav>
+      <Breadcrumbs items={crumbs} />
 
       {/* Encabezado */}
       <header className="mt-5 max-w-2xl">
         <p className="eyebrow">Catálogo</p>
         <h1 className="mt-3 text-hero animate-fade-up">{descriptor.heading}</h1>
         <p className="mt-3 text-[15px] leading-relaxed text-humo">
-          {descriptor.intro}
+          {editorial?.intro ?? descriptor.intro}
         </p>
       </header>
 
@@ -85,6 +81,20 @@ export function CategoryView({
             </Link>
           </div>
         </div>
+      )}
+
+      {editorial && (
+        <section className="mt-12 max-w-2xl rounded-xl bg-papel p-6 shadow-soft">
+          <h2 className="text-xl font-semibold text-carbon">
+            {editorial.heading}
+          </h2>
+          <p className="mt-3 text-[15px] leading-relaxed text-humo">
+            {editorial.details}
+          </p>
+          <Link href="/contacto" className="btn-ghost mt-4">
+            Consultar a Luz
+          </Link>
+        </section>
       )}
 
       {/* Interlinking: explora otras zonas / tipos */}

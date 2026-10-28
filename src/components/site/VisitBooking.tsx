@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { requestVisit } from "@/lib/actions/visits";
-import { pushEvent } from "@/lib/gtm";
+import { confirmedLeadEventId, pushLeadEvent } from "@/lib/gtm";
 import { trackMetaEvent } from "@/lib/meta";
 import { FINANCING_LABELS, FINANCING_OPTIONS } from "@/lib/constants";
 import { formatMexicanWhatsApp } from "@/lib/phone";
@@ -132,6 +132,8 @@ function VisitRequestModal({
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
+  const trackedEventId = useRef<string | null>(null);
+  const submitting = useRef(false);
 
   useEffect(() => {
     const dialog = modalRef.current;
@@ -161,56 +163,63 @@ function VisitRequestModal({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (submitting.current) return;
     const validation = validate();
     if (validation) {
       setError(validation);
       return;
     }
 
+    submitting.current = true;
     setPending(true);
     setError("");
-    const result = await requestVisit({
-      property_id: propertyId,
-      full_name: form.full_name,
-      phone: form.phone,
-      email: form.email,
-      financing: form.financing,
-      message: form.message,
-      company: form.company,
-      source_url: `${window.location.origin}${window.location.pathname}`,
-    });
-    setPending(false);
+    try {
+      const result = await requestVisit({
+        property_id: propertyId,
+        full_name: form.full_name,
+        phone: form.phone,
+        email: form.email,
+        financing: form.financing,
+        message: form.message,
+        company: form.company,
+        source_url: `${window.location.origin}${window.location.pathname}`,
+      });
 
-    if (!result.ok) {
-      setError(
-        result.error ?? "No pude enviar tu solicitud. Intenta de nuevo.",
-      );
-      return;
-    }
+      if (!result.ok) {
+        setError(
+          result.error ?? "No pude enviar tu solicitud. Intenta de nuevo.",
+        );
+        return;
+      }
 
-    const eventParams = {
-      property_id: propertyId,
-      property_title: propertyTitle,
-      operation,
-      financing: form.financing,
-      value: price,
-      currency: "MXN",
-      event_id: result.eventId,
-    };
-    if (result.eventId) {
-      pushEvent("solicitud_visita", eventParams);
-      trackMetaEvent(
-        "Lead",
-        {
-          content_ids: [propertyId],
-          content_name: "Solicitud de visita",
-          content_category: "visit_request",
-          content_type: "product",
-        },
-        result.eventId,
-      );
+      const eventId = confirmedLeadEventId(result);
+      if (eventId && trackedEventId.current !== eventId) {
+        trackedEventId.current = eventId;
+        pushLeadEvent(result, "visit", {
+          property_id: propertyId,
+          property_title: propertyTitle,
+          operation,
+          property_price: price,
+          currency: "MXN",
+        });
+        trackMetaEvent(
+          "Lead",
+          {
+            content_ids: [propertyId],
+            content_name: "Solicitud de visita",
+            content_category: "visit_request",
+            content_type: "product",
+          },
+          eventId,
+        );
+      }
+      setDone(true);
+    } catch {
+      setError("No pude enviar tu solicitud. Intenta de nuevo.");
+    } finally {
+      submitting.current = false;
+      setPending(false);
     }
-    setDone(true);
   }
 
   return (

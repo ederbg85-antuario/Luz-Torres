@@ -5,7 +5,8 @@ import { loadCategory } from "@/lib/category-loader";
 import { getSeoIndex } from "@/lib/data";
 import { categoryMetadata, ubicacionParams } from "@/lib/seo";
 
-export const dynamicParams = false;
+export const dynamicParams = true;
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   return ubicacionParams(await getSeoIndex(), "venta");

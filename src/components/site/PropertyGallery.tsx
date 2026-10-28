@@ -9,10 +9,12 @@ import { PropertyImage } from "./PropertyImage";
 
 export function PropertyGallery({
   images,
+  imageAlts,
   type,
   title,
 }: {
   images: string[];
+  imageAlts?: string[];
   type: PropertyType;
   title: string;
 }) {
@@ -78,13 +80,13 @@ export function PropertyGallery({
           <button
             type="button"
             onClick={() => show(active)}
-            aria-label={`Ampliar foto ${active + 1} de ${count}`}
+            aria-label={"Ampliar foto " + (active + 1) + " de " + count + ": " + (imageAlts?.[active] ?? title)}
             className="absolute inset-0"
           >
             <Image
               key={images[active]}
               src={images[active]}
-              alt={`${title} — foto ${active + 1}`}
+              alt={imageAlts?.[active] ?? title}
               fill
               priority={active === 0}
               sizes="(max-width: 1024px) 100vw, 65vw"
@@ -148,7 +150,7 @@ export function PropertyGallery({
             >
               <Image
                 src={src}
-                alt={`${title} — miniatura ${i + 1}`}
+                alt=""
                 fill
                 sizes="120px"
                 className="object-cover"
@@ -210,7 +212,7 @@ export function PropertyGallery({
           >
             <Image
               src={images[active]}
-              alt={`${title} — foto ${active + 1}`}
+              alt={imageAlts?.[active] ?? title}
               fill
               sizes="100vw"
               className="object-contain"

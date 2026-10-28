@@ -3,9 +3,12 @@ import { FeaturedSection } from "@/components/site/FeaturedSection";
 import { HomeJourney } from "@/components/site/HomeJourney";
 import { CtaSection } from "@/components/site/CtaSection";
 import type { Metadata } from "next";
-import { getFeaturedProperties, getPropertyBySlug } from "@/lib/data";
+import Link from "next/link";
+import { getFeaturedProperties, getPropertyBySlug, getSeoIndex } from "@/lib/data";
 import { SITE } from "@/lib/constants";
 import { SITE_URL } from "@/lib/supabase/config";
+import { allCategoryPaths } from "@/lib/seo";
+import { serializeJsonLd } from "@/lib/json-ld";
 
 export const revalidate = 300;
 
@@ -41,10 +44,16 @@ const jsonLd = {
 };
 
 export default async function HomePage() {
-  const [featured, alpes] = await Promise.all([
+  const [featured, alpes, index] = await Promise.all([
     getFeaturedProperties(6),
     getPropertyBySlug("departamento-venta-los-alpes-alvaro-obregon-iap7712491"),
+    getSeoIndex(),
   ]);
+  const categoryPaths = new Set(allCategoryPaths(index));
+  const localLinks = [
+    { path: "/propiedades/venta/departamentos/alvaro-obregon", label: "Departamentos en venta en Álvaro Obregón" },
+    { path: "/propiedades/venta/casas/chicoloapan", label: "Casas en venta en Chicoloapan" },
+  ].filter((link) => categoryPaths.has(link.path));
   const selection = [
     ...(alpes ? [alpes] : []),
     ...featured.filter((p) => p.id !== alpes?.id),
@@ -54,10 +63,22 @@ export default async function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <Hero properties={selection} />
       <FeaturedSection properties={selection} />
+      {localLinks.length > 0 && (
+        <section className="lt-container mt-12">
+          <h2 className="text-xl font-semibold">Explora propiedades en venta por zona</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {localLinks.map((link) => (
+              <Link key={link.path} href={link.path} className="chip">
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       <HomeJourney />
       <CtaSection />
       <div className="pb-10" />

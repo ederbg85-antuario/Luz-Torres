@@ -10,6 +10,7 @@ import {
 } from "./constants";
 import { slugify, formatPrice } from "./format";
 import { SITE_URL } from "./supabase/config";
+import { propertyCover, propertyImageAlt } from "./property-media";
 
 // ─── Filas mínimas para construir la arquitectura de categorías ─────
 export type SeoRow = Pick<
@@ -183,6 +184,7 @@ export function propertyJsonLd(property: Property, images: string[]) {
 /** Metadata de la ficha: título único, description limpia y canonical. */
 export function propertyMetadata(property: Property): Metadata {
   const description = cleanPropertyDescription(property);
+  const cover = propertyCover(property);
   return {
     title: { absolute: uniquePropertyTitle(property) },
     description,
@@ -192,7 +194,7 @@ export function propertyMetadata(property: Property): Metadata {
       description,
       url: `/propiedades/${property.slug}`,
       type: "website",
-      images: property.cover_image ? [property.cover_image] : undefined,
+      images: cover ? [{ url: cover, alt: propertyImageAlt(cover, property.title) }] : undefined,
     },
   };
 }

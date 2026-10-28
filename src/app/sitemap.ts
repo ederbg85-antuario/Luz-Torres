@@ -3,9 +3,10 @@ import { getPropertySlugs, getSeoIndex } from "@/lib/data";
 import { allCategoryPaths } from "@/lib/seo";
 import { SITE_URL } from "@/lib/supabase/config";
 
+export const revalidate = 300;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
-  const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     "",
@@ -15,7 +16,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/vende-tu-propiedad",
   ].map((path) => ({
     url: `${base}${path}`,
-    lastModified: now,
     changeFrequency: "weekly",
     priority: path === "" ? 1 : 0.7,
   }));
@@ -28,7 +28,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryRoutes: MetadataRoute.Sitemap = allCategoryPaths(seoIndex).map(
     (path) => ({
       url: `${base}${path}`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.7,
     })
