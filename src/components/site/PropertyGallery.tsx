@@ -89,8 +89,12 @@ export function PropertyGallery({
               alt={imageAlts?.[active] ?? title}
               fill
               priority={active === 0}
+              fetchPriority={active === 0 ? "high" : "auto"}
               sizes="(max-width: 1024px) 100vw, 65vw"
-              className="object-cover animate-fade-in transition-transform duration-700 group-hover:scale-[1.025]"
+              className={cn(
+                "object-cover transition-transform duration-700 group-hover:scale-[1.025]",
+                active !== 0 && "animate-fade-in",
+              )}
             />
           </button>
           <span

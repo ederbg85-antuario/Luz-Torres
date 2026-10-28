@@ -4,13 +4,17 @@ import {
   createSupabasePublicClient,
   isSupabaseConfigured,
 } from "@/lib/supabase/public";
-import { createMetaEventId, sendMetaServerEvent } from "@/lib/meta-conversions";
+import { sendMetaServerEvent } from "@/lib/meta-conversions";
+import { isLeadRetryConflict, persistWebLead } from "@/lib/lead-persistence";
+import type { PersistedLead } from "@/lib/lead-persistence";
 import { SITE_URL } from "@/lib/supabase/config";
 
 export type SellerFormState = {
   status: "idle" | "success" | "error";
   message: string;
   eventId?: string;
+  leadId?: string;
+  retryConflict?: boolean;
 };
 
 export async function submitSellerForm(
@@ -56,27 +60,27 @@ export async function submitSellerForm(
     ...(message ? [`Comentarios: ${message}`] : []),
   ].join("\n");
 
+  let saved: PersistedLead;
   try {
     const supabase = createSupabasePublicClient();
-    const { error } = await supabase.from("contacts").insert({
+    saved = await persistWebLead(supabase, {
+      lead_type: "seller",
       full_name: fullName,
       email,
       phone,
       message: details,
       interest: "venta",
-      source: "web",
-      stage: "nuevo",
-    });
-    if (error) throw error;
-  } catch {
+    }, formData.get("lead_context"));
+  } catch (error) {
+    if (isLeadRetryConflict(error)) return { status: "error", retryConflict: true, message: "La solicitud anterior ya se recibió. Estos datos son distintos; puedes enviarlos como una nueva solicitud." };
     return {
       status: "error",
       message: "No pude enviar la solicitud. Intenta de nuevo o escríbeme por WhatsApp.",
     };
   }
 
-  const eventId = createMetaEventId();
-  await sendMetaServerEvent({
+  const eventId = saved.eventId;
+  if (saved.created) await sendMetaServerEvent({
     eventName: "SellerLead",
     eventId,
     email,
@@ -90,5 +94,6 @@ export async function submitSellerForm(
     status: "success",
     message: "Recibí los datos de tu propiedad. Te escribiré para conocerla y preparar una valuación.",
     eventId,
+    leadId: saved.leadId,
   };
 }

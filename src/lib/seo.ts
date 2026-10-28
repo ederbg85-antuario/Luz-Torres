@@ -316,26 +316,17 @@ function op(operation: Operation) {
 export function categoryMetadata(
   d: CategoryDescriptor,
   count: number,
-  minPrice: number | null
+  _minPrice: number | null
 ): Metadata {
-  const lugar = d.municipio
-    ? `${d.municipio}`
-    : d.estado
-    ? d.estado
-    : "México";
+  const lugar = d.municipio ?? d.estado;
   const tipoTxt = d.type
-    ? PROPERTY_TYPE_PLURAL[d.type].toLowerCase()
-    : "propiedades";
-  const desde =
-    minPrice && d.level !== "operation"
-      ? ` desde ${formatPrice(minPrice, d.operation)}`
-      : "";
+    ? (count === 1 ? PROPERTY_TYPE_LABELS : PROPERTY_TYPE_PLURAL)[d.type].toLowerCase()
+    : count === 1 ? "propiedad" : "propiedades";
+  const conditions = d.operation === "renta" ? "requisitos de renta" : "condiciones de compra";
 
   const title = `${d.heading} | ${SITE.name}`;
-  const description =
-    d.level === "operation"
-      ? `${count} propiedades en ${d.operation}: casas, departamentos y más con acompañamiento completo. Agenda tu visita con Luz Torres.`
-      : `${count} ${tipoTxt} en ${d.operation} en ${lugar}${desde}. Ficha técnica, fotos y asesoría integral. Agenda una visita sin compromiso con Luz Torres.`;
+  const description = `${count} ${tipoTxt} en ${d.operation}${lugar ? ` en ${lugar}` : ""}. ` +
+    `Revisa fotos y consulta ${conditions} con Luz Torres para coordinar una visita.`;
 
   return {
     title: { absolute: title },

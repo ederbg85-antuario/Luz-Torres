@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus, Users, Mail, Phone, ChevronRight } from "lucide-react";
-import { getContacts } from "@/lib/admin-data";
+import { getContacts, getLeadAttributions } from "@/lib/admin-data";
+import { ACQUISITION_LABELS, ACQUISITION_SEGMENTS, summarizeLeadSources } from "@/lib/lead-attribution-report";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Badge } from "@/components/ui/Badge";
@@ -29,6 +30,8 @@ export default async function CrmPage({
   const contacts = activeStage
     ? all.filter((c) => c.stage === activeStage)
     : all;
+  const receipts = await getLeadAttributions(contacts.map((contact) => contact.id));
+  const acquisitionSummary = receipts.available ? summarizeLeadSources(contacts, receipts.receipts) : [];
 
   return (
     <>
@@ -73,6 +76,16 @@ export default async function CrmPage({
           );
         })}
       </div>
+
+      {!receipts.available && <p className="mb-5 rounded-xl bg-papel p-4 text-sm text-humo">La adquisición no está disponible en este momento. Vuelve a cargar la página para intentarlo de nuevo.</p>}
+      {receipts.available && acquisitionSummary.length > 0 && <section className="mb-5 rounded-xl bg-papel p-4 shadow-soft">
+        <h2 className="text-sm font-semibold text-carbon">Primera adquisición observada por etapa</h2>
+        <p className="mt-1 text-xs text-humo">{contacts.length} registros cargados del filtro actual, separados por interés y etapa actuales. Primera llegada registrada en la pestaña del visitante, hasta 24 horas antes del envío. Una persona puede enviar varios formularios; los registros sin evidencia permanecen como origen desconocido.</p>
+        <div className="mt-3 overflow-x-auto"><table className="w-full text-left text-xs">
+          <thead><tr><th scope="col" className="py-2">Canal observado</th><th scope="col">Interés actual</th><th scope="col">Etapa actual</th><th scope="col" className="text-right">Registros</th></tr></thead>
+          <tbody>{acquisitionSummary.map((row) => <tr key={`${row.channel}:${row.stage}:${row.segment}`} className="border-t border-linea"><td className="py-2">{ACQUISITION_LABELS[row.channel]}</td><td>{ACQUISITION_SEGMENTS[row.segment]}</td><td>{CONTACT_STAGE_LABELS[row.stage as ContactStage]}</td><td className="text-right">{row.count}</td></tr>)}</tbody>
+        </table></div>
+      </section>}
 
       {contacts.length > 0 ? (
         <div className="space-y-2.5">

@@ -48,6 +48,7 @@ export function Hero({ properties }: { properties: Property[] }) {
               alt={propertyImageAlt(mainCover, main?.title ?? "Luz Torres, asesora inmobiliaria")}
               fill
               priority
+              fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 52vw"
               className="hero-photo object-cover transition-transform duration-700 group-hover:scale-[1.025]"
             />

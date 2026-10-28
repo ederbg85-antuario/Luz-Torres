@@ -5,10 +5,9 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase/public";
 import type { ContactInterest } from "@/lib/types";
-import {
-  createMetaEventId,
-  sendMetaServerEvent,
-} from "@/lib/meta-conversions";
+import { sendMetaServerEvent } from "@/lib/meta-conversions";
+import { isLeadRetryConflict, persistWebLead } from "@/lib/lead-persistence";
+import type { PersistedLead } from "@/lib/lead-persistence";
 
 export type ContactFormState = {
   status: "idle" | "success" | "error";
@@ -16,6 +15,8 @@ export type ContactFormState = {
   eventId?: string;
   interest?: ContactInterest;
   propertyId?: string | null;
+  leadId?: string;
+  retryConflict?: boolean;
 };
 
 const INTERESTS: ContactInterest[] = ["compra", "renta", "venta", "inversion"];
@@ -60,20 +61,20 @@ export async function submitContactForm(
     ? (interestRaw as ContactInterest)
     : "compra";
 
+  let saved: PersistedLead;
   try {
     const supabase = createSupabasePublicClient();
-    const { error } = await supabase.from("contacts").insert({
+    saved = await persistWebLead(supabase, {
+      lead_type: "contact",
       full_name: fullName,
       email: email || null,
       phone: phone || null,
       message: message || null,
       interest,
-      source: "web",
-      stage: "nuevo",
       property_id: propertyId || null,
-    });
-    if (error) throw error;
-  } catch {
+    }, formData.get("lead_context"));
+  } catch (error) {
+    if (isLeadRetryConflict(error)) return { status: "error", retryConflict: true, message: "La solicitud anterior ya se recibió. Estos datos son distintos; puedes enviarlos como una nueva solicitud." };
     return {
       status: "error",
       message:
@@ -81,16 +82,16 @@ export async function submitContactForm(
     };
   }
 
-  const eventId = createMetaEventId();
-  await sendMetaServerEvent({
+  const eventId = saved.eventId;
+  if (saved.created) await sendMetaServerEvent({
     eventName: "ContactLead",
     eventId,
     email,
     phone,
-    contentName: `Contacto web · ${interest}`,
+    contentName: `Contacto web · ${saved.interest}`,
     contentCategory: "contact_request",
     sourceUrl: String(formData.get("source_url") ?? "") || undefined,
-    ...(propertyId ? { contentIds: [propertyId] } : {}),
+    ...(saved.propertyId ? { contentIds: [saved.propertyId] } : {}),
   });
 
   return {
@@ -98,7 +99,8 @@ export async function submitContactForm(
     message:
       "Gracias por escribir. Revisaré tu mensaje y te contactaré sin prisa, pero pronto.",
     eventId,
-    interest,
-    propertyId: propertyId || null,
+    leadId: saved.leadId,
+    interest: saved.interest,
+    propertyId: saved.propertyId,
   };
 }
