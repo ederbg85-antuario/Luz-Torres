@@ -63,7 +63,7 @@ export function Hero({ properties }: { properties: Property[] }) {
                   {main?.colonia ?? "Conoce el catálogo"}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
-                  {main ? formatPrice(main.price) : "Encuentra tu lugar"}
+                  {main ? `${formatPrice(main.price)}${main.operation === "renta" ? " /mes" : ""}` : "Encuentra tu lugar"}
                 </p>
               </div>
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-petroleo shadow-card transition-transform group-hover:rotate-45">
@@ -87,13 +87,13 @@ export function Hero({ properties }: { properties: Property[] }) {
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-medium text-nogal">
-                  También en venta
+                  También en {secondary.operation === "renta" ? "renta" : "venta"}
                 </p>
                 <p className="mt-1 truncate text-sm font-semibold">
                   {secondary.colonia}
                 </p>
                 <p className="mt-1 text-sm text-humo">
-                  {formatPrice(secondary.price)}
+                  {formatPrice(secondary.price)}{secondary.operation === "renta" ? " /mes" : ""}
                 </p>
               </div>
               <ArrowUpRight className="ml-auto h-5 w-5 shrink-0 text-nogal" />
