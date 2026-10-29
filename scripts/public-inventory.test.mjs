@@ -390,10 +390,15 @@ const unpublished = [
     slug: "departamento-venta-los-alpes-alvaro-obregon-iap7712491",
     municipio: "Álvaro Obregón", property_type: "departamento", featured: true,
   }),
+  property("18c4553e-a579-4361-91a7-8cd7edf4695f", {
+    slug: "departamento-venta-san-marcos-azcapotzalco-iap10341317",
+    estado: "Ciudad de México", municipio: "Azcapotzalco", colonia: "San Marcos",
+    property_type: "departamento", price: 2_250_000, area_m2: 54, featured: true,
+  }),
 ];
 
 function unpublishedEnvironment() {
-  // Ambas bajas encabezan el fixture para detectar filtros aplicados tras limit.
+  // Las bajas encabezan el fixture para detectar filtros aplicados tras limit.
   const inventory = [...unpublished, property("visible", { featured: true })];
   const original = JSON.stringify(inventory);
   const data = dataModule((request) => {
@@ -413,7 +418,7 @@ function unpublishedEnvironment() {
   return { data, assertUnchanged: () => assert.equal(JSON.stringify(inventory), original) };
 }
 
-test("las dos bajas se excluyen de todas las lecturas públicas sin alterar otras fichas", async () => {
+test("las tres bajas se excluyen de todas las lecturas públicas sin alterar otras fichas", async () => {
   const { data, assertUnchanged } = unpublishedEnvironment();
   for (const rows of [
     await data.getProperties(),
@@ -437,7 +442,7 @@ test("el sitemap real omite las bajas y sus categorías exclusivas, conserva el 
   for (const p of unpublished) {
     assert.equal(rows.some((r) => r.url.endsWith(`/propiedades/${p.slug}`)), false);
   }
-  assert.equal(rows.some((r) => /chicoloapan|alvaro-obregon/.test(r.url)), false);
+  assert.equal(rows.some((r) => /chicoloapan|alvaro-obregon|azcapotzalco/.test(r.url)), false);
   assert.ok(rows.some((r) => r.url.endsWith("/propiedades/propiedad-visible")));
   assert.ok(rows.some((r) => r.url.endsWith("/propiedades/venta/casas/pachuca-de-soto")));
   assertUnchanged();
