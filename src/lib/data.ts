@@ -27,6 +27,7 @@ function publicClient() {
 const UNPUBLISHED_PROPERTY_IDS = [
   "77ba4e00-c1d1-488b-b516-c14cbb72a060", // Bonito El Manzano
   "2d68a9bf-2a1c-41bd-bfc2-7cc2e57c5adf", // Los Alpes
+  "18c4553e-a579-4361-91a7-8cd7edf4695f", // San Marcos, Azcapotzalco
 ] as const;
 
 /** Toda lectura pública excluye las bajas antes de ordenar o limitar. */
