@@ -11,10 +11,9 @@ const mocks = {
   "react/jsx-runtime": { jsx, jsxs: jsx },
   "next/image": { default: "img", __esModule: true },
   "next/link": { default: "a", __esModule: true },
-  "lucide-react": { ArrowUpRight: "icon", MapPin: "icon" },
-  "@/lib/format": { formatPrice: (price) => `$${price}` },
+  "lucide-react": { ArrowUpRight: "icon", KeyRound: "icon" },
   "./SearchBar": { SearchBar: "search" },
-  "@/lib/property-media": { propertyCover: () => null, propertyImageAlt: () => "" },
+  "./HomeMotion": { MotionToggle: "motion-toggle" },
 };
 vm.runInNewContext(ts.transpileModule(
   readFileSync(new URL("../src/components/site/Hero.tsx", import.meta.url), "utf8"),
@@ -31,31 +30,19 @@ const text = (node) => Array.isArray(node)
   : node && typeof node === "object"
     ? text(node.props?.children)
     : typeof node === "string" || typeof node === "number" ? String(node) : "";
-const paragraphs = (node) => Array.isArray(node)
-  ? node.flatMap(paragraphs)
-  : node && typeof node === "object"
-    ? [...(node.type === "p" ? [text(node)] : []), ...paragraphs(node.props?.children)]
-    : [];
+const nodes = (node) => Array.isArray(node) ? node.flatMap(nodes)
+  : node && typeof node === "object" ? [node, ...nodes(node.props?.children)] : [];
 
-for (const mainOperation of ["venta", "renta"]) {
-  for (const secondaryOperation of ["venta", "renta"]) {
-    test(`Hero respeta operación y mensualidad: principal ${mainOperation}, secundaria ${secondaryOperation}`, () => {
-      const properties = [mainOperation, secondaryOperation].map((operation, i) => ({
-        id: String(i), slug: `fixture-${i}`, title: "Fixture", colonia: "Centro", operation,
-        price: i === 0 ? 100 : 200,
-      }));
-      const lines = paragraphs(module.exports.Hero({ properties }));
-      assert.ok(lines.includes(`Propiedad en ${secondaryOperation}`));
-      assert.ok(lines.includes("Luz Torres"));
-      assert.ok(lines.includes(`$200${secondaryOperation === "renta" ? " /mes" : ""}`));
-    });
-  }
-}
+test("la portada invita a contactar a Luz sin anunciar un inmueble arbitrario", () => {
+  const hero = module.exports.Hero();
+  const links = nodes(hero).filter((node) => node.type === "a");
+  assert.ok(links.some((link) => link.props.href === "/contacto" && /Cuéntale a Luz/.test(text(link))));
+  assert.ok(!links.some((link) => link.props.href.startsWith("/propiedades/")));
+  assert.doesNotMatch(text(hero), /Polanco|Propiedad en venta|Propiedad en renta|\$\d/);
+});
 
 test("el retrato principal de Luz con llaves se mantiene incluso sin inmuebles", () => {
-  const nodes = (node) => Array.isArray(node) ? node.flatMap(nodes)
-    : node && typeof node === "object" ? [node, ...nodes(node.props?.children)] : [];
-  const images = nodes(module.exports.Hero({ properties: [] })).filter((n) => n.type === "img");
+  const images = nodes(module.exports.Hero()).filter((n) => n.type === "img");
   assert.equal(images[0].props.src, "/luz-keys.jpg");
   assert.match(images[0].props.alt, /Luz Torres.*llaves/);
   assert.equal(images[0].props.priority, true);

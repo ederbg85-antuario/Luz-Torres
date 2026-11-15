@@ -219,7 +219,7 @@
   flex-direction: column;
 }
 .hero-photo {
-  animation: photo-settle 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: photo-settle 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 @keyframes photo-settle {
   from {
@@ -230,7 +230,62 @@
   }
 }
 
+/* Home motion uses compositor properties only, with no frame-by-frame JS. */
+.home-motion .motion-loop {
+  animation-play-state: paused;
+}
+.home-motion [data-motion-active="true"] .motion-loop {
+  animation-play-state: running;
+}
+.home-motion[data-motion-paused="true"] .motion-loop,
+.home-motion .hero-contact:focus-within .motion-loop {
+  animation-play-state: paused;
+}
+.key-orbit {
+  animation: key-orbit 18s linear infinite;
+}
+.key-float {
+  animation: key-float 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.process-pulse {
+  opacity: 0;
+  animation: process-pulse 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.process-pulse-1 { animation-delay: 3s; }
+.process-pulse-2 { animation-delay: 6s; }
+.home-motion .btn,
+.home-motion .chip {
+  transition-property: transform, color, background-color, box-shadow;
+}
+@keyframes key-orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes key-float {
+  0%, 100% { transform: translateY(2px) rotate(-12deg); }
+  50% { transform: translateY(-3px) rotate(10deg); }
+}
+@keyframes process-pulse {
+  0% { opacity: .65; transform: scale(1); }
+  27%, 100% { opacity: 0; transform: scale(1.8); }
+}
+@media (min-width: 768px) {
+  .process-steps::before {
+    content: "";
+    position: absolute;
+    height: 1px;
+    top: 24px;
+    left: 24px;
+    right: calc(33.333% - 48px);
+    background: #b4c2bd;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .home-motion .hero-contact:hover .motion-loop { animation-play-state: paused; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .home-motion .motion-loop { animation: none; }
+  .home-motion .motion-toggle { display: none; }
   [data-reveal].reveal-ready:not(.is-visible) {
     opacity: 1;
     transform: none;

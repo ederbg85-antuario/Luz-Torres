@@ -1,20 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import type { Property } from "@/lib/types";
-import { formatPrice } from "@/lib/format";
+import { ArrowUpRight, KeyRound } from "lucide-react";
 import { SearchBar } from "./SearchBar";
-import { propertyCover, propertyImageAlt } from "@/lib/property-media";
+import { MotionToggle } from "./HomeMotion";
 
-export function Hero({ properties }: { properties: Property[] }) {
-  const secondary = properties[1] ?? properties[0];
-  const secondaryCover = secondary ? propertyCover(secondary) : null;
+export function Hero() {
   return (
     <section className="lt-container pb-6 pt-7 sm:pt-12">
       <div className="grid items-center gap-9 lg:grid-cols-[.95fr_1.05fr] lg:gap-14">
         <div className="relative z-10 py-3 lg:py-10">
           <p className="eyebrow animate-fade-up">
-            Casas y departamentos · México
+          Casas y departamentos · México
           </p>
           <h1 className="mt-5 max-w-xl text-[44px] font-medium leading-[1.04] tracking-[-.045em] sm:text-[62px] lg:text-[70px] animate-fade-up delay-75">
             Tu próximo
@@ -33,8 +29,9 @@ export function Hero({ properties }: { properties: Property[] }) {
           <div className="mt-8 animate-fade-up delay-300">
             <SearchBar />
           </div>
+          <MotionToggle />
         </div>
-        <div className="relative pb-12 lg:pb-8">
+        <div className="relative pb-12 lg:pb-8" data-motion-scene>
           <Link
             href="/sobre-luz"
             aria-label="Conoce a Luz Torres, tu asesora inmobiliaria"
@@ -47,13 +44,13 @@ export function Hero({ properties }: { properties: Property[] }) {
               priority
               fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 52vw"
-              className="hero-photo object-cover object-[center_35%] transition-transform duration-700 group-hover:scale-[1.025]"
+              className="hero-photo object-cover object-[center_35%]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
             <span className="absolute left-5 top-5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-petroleo shadow-card">
               Conoce a tu asesora
             </span>
-            <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 text-white">
+            <div className="absolute bottom-24 left-6 right-6 flex items-end justify-between gap-4 text-white">
               <div>
                 <p className="text-sm text-white/85">
                   Asesora inmobiliaria
@@ -67,34 +64,21 @@ export function Hero({ properties }: { properties: Property[] }) {
               </span>
             </div>
           </Link>
-          {secondary && (
-            <Link
-              href={`/propiedades/${secondary.slug}`}
-              className="absolute -bottom-1 left-5 right-5 flex items-center gap-4 rounded-lg bg-white p-3 shadow-floating sm:left-auto sm:right-[-12px] sm:w-[320px]"
-            >
-              <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md">
-                <Image
-                  src={secondaryCover ?? "/luz-keys.jpg"}
-                  alt={propertyImageAlt(secondaryCover, secondary.title)}
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-nogal">
-                  Propiedad en {secondary.operation === "renta" ? "renta" : "venta"}
-                </p>
-                <p className="mt-1 truncate text-sm font-semibold">
-                  {secondary.colonia}
-                </p>
-                <p className="mt-1 text-sm text-humo">
-                  {formatPrice(secondary.price)}{secondary.operation === "renta" ? " /mes" : ""}
-                </p>
-              </div>
-              <ArrowUpRight className="ml-auto h-5 w-5 shrink-0 text-nogal" />
-            </Link>
-          )}
+          <Link href="/contacto" className="hero-contact group absolute -bottom-1 left-4 right-4 flex items-center gap-4 rounded-lg bg-white p-4 shadow-floating sm:left-auto sm:right-[-12px] sm:w-[340px]">
+            <span className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full bg-[#f2ece4] text-nogal" aria-hidden="true">
+              <svg viewBox="0 0 64 64" className="motion-loop key-orbit absolute inset-0 h-full w-full fill-none">
+                <circle cx="32" cy="32" r="27" stroke="currentColor" strokeOpacity=".25" strokeDasharray="3 7" />
+                <circle cx="32" cy="5" r="3" fill="currentColor" />
+              </svg>
+              <KeyRound size={27} className="motion-loop key-float" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold uppercase tracking-[.14em] text-nogal">Tu siguiente paso</span>
+              <span className="mt-1 block text-lg font-semibold text-petroleo">Las llaves de una nueva etapa.</span>
+              <span className="mt-1 block text-xs text-humo">Cuéntale a Luz qué estás buscando</span>
+            </span>
+            <ArrowUpRight className="ml-auto h-5 w-5 shrink-0 text-nogal transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </section>

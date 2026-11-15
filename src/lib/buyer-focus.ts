@@ -5,6 +5,7 @@ import { slugify } from "./format";
 
 const focusAreas = {
   "Benito Juárez": {
+    slugs: ["departamento-venta-del-valle-sur-benito-juarez-iap8022745", "departamento-venta-del-valle-sur-benito-juarez-iap7975541"],
     colonia: "Del Valle Sur",
     shortLocation: "Del Valle Sur",
     location: "Del Valle Sur, Benito Juárez",
@@ -16,6 +17,7 @@ const focusAreas = {
     ],
   },
   "Pachuca de Soto": {
+    slugs: ["departamento-venta-centro-pachuca-de-soto-iap4729457", "departamento-venta-centro-pachuca-de-soto-iap4729478"],
     colonia: "Centro",
     shortLocation: "Centro, Pachuca",
     location: "Centro, Pachuca de Soto",
@@ -28,6 +30,8 @@ const focusAreas = {
   },
 } as const;
 
+export const BUYER_PRIORITY_PROPERTY_SLUGS = Object.values(focusAreas).flatMap((area) => [...area.slugs]);
+
 /** One existing municipal URL serves the buyer's neighborhood intent. */
 export function buyerFocus(descriptor: CategoryDescriptor, properties: Property[]) {
   if (descriptor.operation !== "venta" || descriptor.type !== "departamento" || descriptor.level !== "municipio") return null;
@@ -36,9 +40,7 @@ export function buyerFocus(descriptor: CategoryDescriptor, properties: Property[
 
   // Detailed unit comparisons apply only while the researched pair is present.
   // A changed catalog keeps the normal inventory copy instead of stale claims.
-  const expected = descriptor.municipio === "Benito Juárez"
-    ? ["departamento-venta-del-valle-sur-benito-juarez-iap8022745", "departamento-venta-del-valle-sur-benito-juarez-iap7975541"]
-    : ["departamento-venta-centro-pachuca-de-soto-iap4729457", "departamento-venta-centro-pachuca-de-soto-iap4729478"];
+  const expected: readonly string[] = area.slugs;
   if (properties.length !== expected.length || expected.some((slug) => !properties.some((p) => p.slug === slug))) return null;
 
   const ordered = [...properties].sort((a, b) => a.price - b.price);
