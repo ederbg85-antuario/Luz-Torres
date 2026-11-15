@@ -59,7 +59,7 @@ export function Hero() {
                   Luz Torres
                 </p>
               </div>
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-petroleo shadow-card transition-transform group-hover:rotate-45">
+              <span className="mb-6 grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-petroleo shadow-card transition-transform group-hover:rotate-45">
                 <ArrowUpRight size={22} />
               </span>
             </div>

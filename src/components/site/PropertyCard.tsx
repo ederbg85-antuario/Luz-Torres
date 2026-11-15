@@ -18,9 +18,11 @@ function Spec({ icon: Icon, value }: { icon: typeof Maximize; value: string }) {
 export function PropertyCard({
   property,
   index = 0,
+  imageSizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
 }: {
   property: Property;
   index?: number;
+  imageSizes?: string;
 }) {
   const sold = property.status === "vendido" || property.status === "rentado";
   const cover = propertyCover(property);
@@ -38,7 +40,7 @@ export function PropertyCard({
             type={property.property_type}
             alt={propertyImageAlt(cover, property.title)}
             index={index}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes={imageSizes}
           />
         </div>
         {/* Velo inferior para legibilidad de los badges */}
