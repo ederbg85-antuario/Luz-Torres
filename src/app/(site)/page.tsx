@@ -7,8 +7,10 @@ import Link from "next/link";
 import { getFeaturedProperties, getPropertyBySlug, getSeoIndex } from "@/lib/data";
 import { SITE } from "@/lib/constants";
 import { SITE_URL } from "@/lib/supabase/config";
-import { allCategoryPaths } from "@/lib/seo";
+import { buyerAreaLinks, BUYER_PRIORITY_PROPERTY_SLUGS } from "@/lib/buyer-focus";
 import { serializeJsonLd } from "@/lib/json-ld";
+import { HomeMotion } from "@/components/site/HomeMotion";
+import { HomeProcess } from "@/components/site/HomeProcess";
 
 export const revalidate = 300;
 
@@ -44,20 +46,14 @@ const jsonLd = {
 };
 
 export default async function HomePage() {
-  const [featured, alpes, index] = await Promise.all([
+  const [featured, index, focused] = await Promise.all([
     getFeaturedProperties(6),
-    getPropertyBySlug("departamento-venta-los-alpes-alvaro-obregon-iap7712491"),
     getSeoIndex(),
+    Promise.all(BUYER_PRIORITY_PROPERTY_SLUGS.map(getPropertyBySlug)),
   ]);
-  const categoryPaths = new Set(allCategoryPaths(index));
-  const localLinks = [
-    { path: "/propiedades/venta/departamentos/alvaro-obregon", label: "Departamentos en venta en Álvaro Obregón" },
-    { path: "/propiedades/venta/casas/chicoloapan", label: "Casas en venta en Chicoloapan" },
-  ].filter((link) => categoryPaths.has(link.path));
-  const selection = [
-    ...(alpes ? [alpes] : []),
-    ...featured.filter((p) => p.id !== alpes?.id),
-  ].slice(0, 6);
+  const localLinks = buyerAreaLinks(index);
+  const confirmed = focused.filter((property) => property !== null);
+  const selection = confirmed.length > 0 ? confirmed : featured;
 
   return (
     <>
@@ -65,23 +61,26 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
-      <Hero properties={selection} />
-      <FeaturedSection properties={selection} />
-      {localLinks.length > 0 && (
-        <section className="lt-container mt-12">
-          <h2 className="text-xl font-semibold">Explora propiedades en venta por zona</h2>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {localLinks.map((link) => (
-              <Link key={link.path} href={link.path} className="chip">
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-      <HomeJourney />
-      <CtaSection />
-      <div className="pb-10" />
+      <HomeMotion>
+        <Hero />
+        <HomeProcess />
+        <FeaturedSection properties={selection} />
+        {localLinks.length > 0 && (
+          <section className="lt-container mt-12">
+            <h2 className="text-xl font-semibold">Explora propiedades en venta por zona</h2>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {localLinks.map((link) => (
+                <Link key={link.path} href={link.path} className="chip">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+        <HomeJourney />
+        <CtaSection />
+        <div className="pb-10" />
+      </HomeMotion>
     </>
   );
 }

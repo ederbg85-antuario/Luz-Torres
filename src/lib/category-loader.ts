@@ -8,6 +8,7 @@ import {
   type CategoryLink,
 } from "./seo";
 import type { Property } from "./types";
+import { buyerFocus } from "./buyer-focus";
 
 export type LoadedCategory = {
   descriptor: CategoryDescriptor;
@@ -26,13 +27,16 @@ export async function loadCategory(parts: {
   ubicacionSlug?: string;
 }): Promise<LoadedCategory | null> {
   const index = await getSeoIndex();
-  const descriptor = resolveCategory(index, parts);
+  let descriptor = resolveCategory(index, parts);
   if (!descriptor) return null;
 
   const properties = await getProperties(categoryFilters(descriptor));
   if (properties.length === 0) return null;
   const related = relatedCategories(index, descriptor);
   const minPrice = Math.min(...properties.map((p) => p.price));
+
+  const focus = buyerFocus(descriptor, properties);
+  if (focus) descriptor = { ...descriptor, heading: focus.heading, intro: focus.intro, searchTitle: focus.title, searchDescription: focus.description };
 
   return { descriptor, properties, related, minPrice };
 }

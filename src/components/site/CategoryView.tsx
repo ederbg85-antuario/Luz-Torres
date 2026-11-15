@@ -8,6 +8,7 @@ import type {
 import { categoryBreadcrumb, categoryJsonLd } from "@/lib/seo";
 import { serializeJsonLd } from "@/lib/json-ld";
 import { localSalesContent } from "@/lib/local-sales-content";
+import { buyerFocus } from "@/lib/buyer-focus";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { PropertyCard } from "./PropertyCard";
 
@@ -22,6 +23,8 @@ export function CategoryView({
 }) {
   const crumbs = categoryBreadcrumb(descriptor);
   const editorial = localSalesContent(descriptor, properties);
+  const buyer = buyerFocus(descriptor, properties);
+  const intro = buyer?.intro ?? editorial?.intro ?? descriptor.intro;
 
   return (
     <div className="lt-container py-10">
@@ -30,7 +33,7 @@ export function CategoryView({
         dangerouslySetInnerHTML={{
           __html: serializeJsonLd(
             categoryJsonLd(
-              editorial ? { ...descriptor, intro: editorial.intro } : descriptor,
+              { ...descriptor, intro },
               properties,
             ),
           ),
@@ -45,7 +48,7 @@ export function CategoryView({
         <p className="eyebrow">Catálogo</p>
         <h1 className="mt-3 text-hero animate-fade-up">{descriptor.heading}</h1>
         <p className="mt-3 text-[15px] leading-relaxed text-humo">
-          {editorial?.intro ?? descriptor.intro}
+          {intro}
         </p>
       </header>
 
@@ -83,7 +86,55 @@ export function CategoryView({
         </div>
       )}
 
-      {editorial && (
+      {buyer && (
+        <section className="mt-12" aria-labelledby="comparar-departamentos">
+          <h2 id="comparar-departamentos" className="text-2xl font-semibold text-carbon">
+            {buyer.comparisonHeading}
+          </h2>
+          <div className="mt-5 overflow-x-auto rounded-xl border border-lino">
+            <table className="w-full min-w-[620px] text-left text-sm">
+              <caption className="px-5 py-3 text-left text-humo">
+                Datos publicados de cada ficha. Consulta con Luz la disponibilidad y el desglose de superficies antes de comprar.
+              </caption>
+              <thead className="bg-papel text-carbon">
+                <tr>
+                  <th scope="col" className="p-4">Departamento</th>
+                  <th scope="col" className="p-4">Precio publicado</th>
+                  <th scope="col" className="p-4">Recámaras</th>
+                  <th scope="col" className="p-4">Superficie publicada</th>
+                  <th scope="col" className="p-4">Siguiente paso</th>
+                </tr>
+              </thead>
+              <tbody>
+                {buyer.properties.map((property) => (
+                  <tr key={property.id} className="border-t border-lino align-top">
+                    <th scope="row" className="p-4 font-medium text-carbon">{property.title}</th>
+                    <td className="p-4 whitespace-nowrap">{new Intl.NumberFormat("es-MX", { style: "currency", currency: property.currency || "MXN", maximumFractionDigits: 0 }).format(property.price)} {property.currency || "MXN"}</td>
+                    <td className="p-4">{property.bedrooms ?? "Por confirmar"}</td>
+                    <td className="p-4">{property.area_m2 ? `${property.area_m2} m²` : "Por confirmar"}</td>
+                    <td className="p-4"><Link href={`/propiedades/${property.slug}`} className="font-medium text-nogal underline underline-offset-4">Ver ficha y solicitar contacto</Link></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-8 max-w-3xl">
+            <h2 className="text-xl font-semibold text-carbon">{buyer.detailsHeading}</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-humo">{buyer.details}</p>
+            <div className="mt-6 space-y-3">
+              {buyer.questions.map(({ question, answer }) => (
+                <details key={question} className="rounded-xl bg-papel p-5">
+                  <summary className="cursor-pointer font-medium text-carbon">{question}</summary>
+                  <p className="mt-3 text-[15px] leading-relaxed text-humo">{answer}</p>
+                </details>
+              ))}
+            </div>
+            <p className="mt-6 text-sm leading-relaxed text-humo">Abre la ficha del departamento que te interese y elige «Quiero que me contacten». Luz recibirá la referencia del inmueble y tu WhatsApp para resolver tus dudas y coordinar la visita.</p>
+          </div>
+        </section>
+      )}
+
+      {editorial && !buyer && (
         <section className="mt-12 max-w-2xl rounded-xl bg-papel p-6 shadow-soft">
           <h2 className="text-xl font-semibold text-carbon">
             {editorial.heading}

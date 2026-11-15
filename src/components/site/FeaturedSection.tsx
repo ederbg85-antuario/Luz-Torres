@@ -26,7 +26,7 @@ export function FeaturedSection({ properties }: { properties: Property[] }) {
       </Reveal>
 
       {properties.length > 0 ? (
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={`mt-10 grid gap-6 sm:grid-cols-2 ${properties.length === 4 ? "" : "lg:grid-cols-3"}`}>
           {properties.map((p, i) => (
             <Reveal key={p.id} delay={(i % 3) * 100} className="h-full">
               <PropertyCard property={p} index={i} />

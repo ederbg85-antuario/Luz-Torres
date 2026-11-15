@@ -212,6 +212,8 @@ export type CategoryDescriptor = {
   path: string;
   heading: string;
   intro: string;
+  searchTitle?: string;
+  searchDescription?: string;
 };
 
 /** Filtros equivalentes para consultar el catálogo de una categoría. */
@@ -324,9 +326,9 @@ export function categoryMetadata(
     : count === 1 ? "propiedad" : "propiedades";
   const conditions = d.operation === "renta" ? "requisitos de renta" : "condiciones de compra";
 
-  const title = `${d.heading} | ${SITE.name}`;
-  const description = `${count} ${tipoTxt} en ${d.operation}${lugar ? ` en ${lugar}` : ""}. ` +
-    `Revisa fotos y consulta ${conditions} con Luz Torres para coordinar una visita.`;
+  const title = d.searchTitle ?? `${d.heading} | ${SITE.name}`;
+  const description = d.searchDescription ?? (`${count} ${tipoTxt} en ${d.operation}${lugar ? ` en ${lugar}` : ""}. ` +
+    `Revisa fotos y consulta ${conditions} con Luz Torres para coordinar una visita.`);
 
   return {
     title: { absolute: title },
