@@ -4,13 +4,21 @@ import { HomeJourney } from "@/components/site/HomeJourney";
 import { CtaSection } from "@/components/site/CtaSection";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getFeaturedProperties, getPropertyBySlug, getSeoIndex } from "@/lib/data";
+import {
+  getFeaturedProperties,
+  getPropertyBySlug,
+  getSeoIndex,
+} from "@/lib/data";
 import { SITE } from "@/lib/constants";
 import { SITE_URL } from "@/lib/supabase/config";
-import { buyerAreaLinks, BUYER_PRIORITY_PROPERTY_SLUGS } from "@/lib/buyer-focus";
+import {
+  buyerAreaLinks,
+  BUYER_PRIORITY_PROPERTY_SLUGS,
+} from "@/lib/buyer-focus";
 import { serializeJsonLd } from "@/lib/json-ld";
 import { HomeMotion } from "@/components/site/HomeMotion";
 import { HomeProcess } from "@/components/site/HomeProcess";
+import { HomeMarquee } from "@/components/site/HomeMarquee";
 
 export const revalidate = 300;
 
@@ -63,11 +71,11 @@ export default async function HomePage() {
       />
       <HomeMotion>
         <Hero />
-        <HomeProcess />
+        <HomeMarquee />
         <FeaturedSection properties={selection} />
         {localLinks.length > 0 && (
-          <section className="lt-container mt-12">
-            <h2 className="text-xl font-semibold">Explora propiedades en venta por zona</h2>
+          <section className="home-areas home-editorial-container">
+            <h2>Busca por donde quieres vivir.</h2>
             <div className="mt-4 flex flex-wrap gap-3">
               {localLinks.map((link) => (
                 <Link key={link.path} href={link.path} className="chip">
@@ -77,6 +85,7 @@ export default async function HomePage() {
             </div>
           </section>
         )}
+        <HomeProcess />
         <HomeJourney />
         <CtaSection />
         <div className="pb-10" />

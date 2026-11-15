@@ -19,10 +19,12 @@ export function PropertyCard({
   property,
   index = 0,
   imageSizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
+  editorial = false,
 }: {
   property: Property;
   index?: number;
   imageSizes?: string;
+  editorial?: boolean;
 }) {
   const sold = property.status === "vendido" || property.status === "rentado";
   const cover = propertyCover(property);
@@ -31,10 +33,18 @@ export function PropertyCard({
   return (
     <Link
       href={`/propiedades/${property.slug}`}
-      className="group relative block h-full overflow-hidden rounded-xl bg-papel shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-elevated"
+      className={cn(
+        "group relative block h-full overflow-hidden rounded-xl bg-papel shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-elevated",
+        editorial && "editorial-property-card",
+      )}
     >
       <div className="relative aspect-[16/10] overflow-hidden">
-        <div className="relative h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.06]">
+        <div
+          className={cn(
+            "relative h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.06]",
+            editorial && "motion-loop editorial-image-drift",
+          )}
+        >
           <PropertyImage
             src={cover}
             type={property.property_type}

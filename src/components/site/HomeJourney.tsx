@@ -1,78 +1,68 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Check } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Reveal } from "./Reveal";
 
 export function HomeJourney() {
   return (
-    <section className="lt-container mt-20 sm:mt-28">
-      <div className="grid gap-6 md:grid-cols-2">
-        <Reveal className="h-full">
-          <div className="relative flex h-full min-h-[340px] flex-col justify-between overflow-hidden rounded-2xl bg-nogal p-8 text-white shadow-elevated sm:p-10">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[.18em] text-white/70">
-                Para propietarios
-              </p>
-              <h2 className="mt-5 max-w-sm text-4xl font-medium leading-[1.08] text-white">
-                Tu propiedad.
-                <br />
-                <span className="font-serif font-normal italic">
-                  Un nuevo comienzo.
-                </span>
-              </h2>
-              <p className="mt-4 max-w-xs text-base text-white/80">
-                Valuación, promoción y acompañamiento hasta la firma.
-              </p>
-            </div>
-            <Link
-              href="/vende-tu-propiedad"
-              className="mt-8 inline-flex w-fit items-center gap-5 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-nogal shadow-card transition-transform hover:-translate-y-1"
-            >
-              Quiero vender
-              <ArrowUpRight size={18} />
+    <section
+      className="home-journey home-editorial-container"
+      data-motion-scene
+    >
+      <div className="journey-portrait">
+        <Image
+          src="/luz-outdoor.jpg"
+          alt="Luz Torres, asesora inmobiliaria"
+          fill
+          sizes="(max-width: 767px) calc(100vw - 48px), 42vw"
+          className="object-cover object-top"
+        />
+        <svg
+          className="journey-flower motion-loop"
+          viewBox="0 0 180 180"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M90 10C130 10 98 65 90 90C115 65 170 50 170 90C170 130 115 98 90 90C115 115 130 170 90 170C50 170 82 115 90 90C65 115 10 130 10 90C10 50 65 82 90 90C65 65 50 10 90 10Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+        </svg>
+        <span className="journey-caption">
+          Una persona. De principio a fin.
+        </span>
+      </div>
+      <div className="journey-story">
+        <Reveal>
+          <p className="home-kicker">Hola, soy Luz.</p>
+          <h2 className="home-display">
+            Tu propiedad importa.
+            <br />
+            <em>Tu tranquilidad, también.</em>
+          </h2>
+          <p className="journey-intro">
+            Comprar o vender una propiedad es una decisión importante. Estoy
+            aquí para escucharte, resolver tus dudas y acompañarte en el
+            proceso.
+          </p>
+          <Link href="/sobre-luz" className="home-inline-cta">
+            Conoce a tu asesora <ArrowUpRight size={19} aria-hidden="true" />
+          </Link>
+        </Reveal>
+        <div className="journey-owner">
+          <span className="journey-owner-icon motion-loop" aria-hidden="true">
+            ↗
+          </span>
+          <div>
+            <h3>¿Es momento de vender?</h3>
+            <p>Hablemos de tu propiedad y del siguiente paso.</p>
+            <Link href="/vende-tu-propiedad">
+              Quiero vender mi propiedad{" "}
+              <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
           </div>
-        </Reveal>
-        <Reveal delay={100} className="h-full">
-          <div className="grid h-full grid-cols-[1fr_1.05fr] overflow-hidden rounded-2xl bg-white shadow-card">
-            <div className="relative min-h-[340px]">
-              <Image
-                src="/luz-outdoor.jpg"
-                alt="Luz Torres"
-                fill
-                sizes="(max-width: 768px) 45vw, 25vw"
-                className="object-cover object-top"
-              />
-            </div>
-            <div className="flex flex-col justify-center p-5 sm:p-8">
-              <p className="eyebrow">Conoce a Luz</p>
-              <h2 className="mt-3 text-2xl font-medium leading-tight sm:text-3xl">
-                Cerca de ti.
-                <br />
-                <span className="text-petroleo">En cada paso.</span>
-              </h2>
-              <ul className="mt-6 space-y-3 text-sm text-humo">
-                {[
-                  "Asesoría personal",
-                  "Compra, venta y renta",
-                  "Proceso claro",
-                ].map((t) => (
-                  <li key={t} className="flex items-center gap-2">
-                    <Check size={15} className="shrink-0 text-almendra" />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/sobre-luz"
-                className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-nogal"
-              >
-                Conóceme
-                <ArrowUpRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </Reveal>
+        </div>
       </div>
     </section>
   );

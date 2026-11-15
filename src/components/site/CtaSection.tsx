@@ -2,17 +2,23 @@ import { ArrowUpRight } from "lucide-react";
 import { whatsappLink } from "@/lib/constants";
 import { TrackedLink } from "./TrackedLink";
 import { Reveal } from "./Reveal";
+
 export function CtaSection() {
   return (
-    <section className="lt-container mt-20">
-      <Reveal>
-        <div className="flex flex-col items-start justify-between gap-7 rounded-2xl bg-[#f5f7f6] p-8 sm:flex-row sm:items-center sm:p-10">
-          <div>
-            <p className="eyebrow">Hablemos</p>
-            <h2 className="mt-3 text-3xl font-medium sm:text-4xl">
-              Tu siguiente paso empieza aquí.
-            </h2>
-          </div>
+    <section className="home-outro" data-motion-scene>
+      <div className="home-editorial-container">
+        <p className="home-kicker">Tu próxima historia puede empezar hoy.</p>
+        <Reveal>
+          <h2>
+            ¿Lo <em>encontramos?</em>
+          </h2>
+        </Reveal>
+        <div className="outro-bottom">
+          <p>
+            Cuéntame dónde te gustaría vivir.
+            <br />
+            Empecemos por ahí.
+          </p>
           <TrackedLink
             href={whatsappLink(
               "Hola Luz, me gustaría recibir asesoría inmobiliaria.",
@@ -21,13 +27,18 @@ export function CtaSection() {
             params={{ ubicacion: "cta_home" }}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary shrink-0 px-7 py-4"
+            className="outro-contact"
           >
-            Escribir a Luz
-            <ArrowUpRight size={18} />
+            Hablemos{" "}
+            <span>
+              <ArrowUpRight size={25} aria-hidden="true" />
+            </span>
           </TrackedLink>
         </div>
-      </Reveal>
+        <div className="outro-line" aria-hidden="true">
+          <span className="motion-loop" />
+        </div>
+      </div>
     </section>
   );
 }

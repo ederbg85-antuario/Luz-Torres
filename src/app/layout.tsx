@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import { SITE_URL } from "@/lib/supabase/config";
 import "./globals.css";
+import "./home.css";
 
 const inter = Inter({
   subsets: ["latin"],
