@@ -45,9 +45,19 @@ for (const mainOperation of ["venta", "renta"]) {
         price: i === 0 ? 100 : 200,
       }));
       const lines = paragraphs(module.exports.Hero({ properties }));
-      assert.ok(lines.includes(`También en ${secondaryOperation}`));
-      assert.ok(lines.includes(`$100${mainOperation === "renta" ? " /mes" : ""}`));
+      assert.ok(lines.includes(`Propiedad en ${secondaryOperation}`));
+      assert.ok(lines.includes("Luz Torres"));
       assert.ok(lines.includes(`$200${secondaryOperation === "renta" ? " /mes" : ""}`));
     });
   }
 }
+
+test("el retrato principal de Luz con llaves se mantiene incluso sin inmuebles", () => {
+  const nodes = (node) => Array.isArray(node) ? node.flatMap(nodes)
+    : node && typeof node === "object" ? [node, ...nodes(node.props?.children)] : [];
+  const images = nodes(module.exports.Hero({ properties: [] })).filter((n) => n.type === "img");
+  assert.equal(images[0].props.src, "/luz-keys.jpg");
+  assert.match(images[0].props.alt, /Luz Torres.*llaves/);
+  assert.equal(images[0].props.priority, true);
+  assert.equal(images.length, 1);
+});
