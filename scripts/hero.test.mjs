@@ -11,7 +11,7 @@ const mocks = {
   "react/jsx-runtime": { jsx, jsxs: jsx },
   "next/image": { default: "img", __esModule: true },
   "next/link": { default: "a", __esModule: true },
-  "lucide-react": { ArrowUpRight: "icon", KeyRound: "icon" },
+  "lucide-react": { ArrowUpRight: "icon", ArrowDown: "icon" },
   "./SearchBar": { SearchBar: "search" },
   "./HomeMotion": { MotionToggle: "motion-toggle" },
 };
@@ -36,7 +36,7 @@ const nodes = (node) => Array.isArray(node) ? node.flatMap(nodes)
 test("la portada invita a contactar a Luz sin anunciar un inmueble arbitrario", () => {
   const hero = module.exports.Hero();
   const links = nodes(hero).filter((node) => node.type === "a");
-  assert.ok(links.some((link) => link.props.href === "/contacto" && /Cuéntale a Luz/.test(text(link))));
+  assert.ok(links.some((link) => link.props.href === "/contacto" && /Hablar con Luz/.test(text(link))));
   assert.ok(!links.some((link) => link.props.href.startsWith("/propiedades/")));
   assert.doesNotMatch(text(hero), /Polanco|Propiedad en venta|Propiedad en renta|\$\d/);
 });

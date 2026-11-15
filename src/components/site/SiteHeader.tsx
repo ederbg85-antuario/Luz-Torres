@@ -26,7 +26,12 @@ export function SiteHeader() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-6">
+    <header
+      className={cn(
+        "sticky top-0 z-40 px-3 pt-3 sm:px-6",
+        pathname === "/" && "home-site-header",
+      )}
+    >
       <div className="lt-container flex h-[72px] items-center justify-between gap-3 rounded-xl bg-white/95 shadow-card backdrop-blur-xl">
         <Link
           href="/"
@@ -94,10 +99,7 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <WhatsAppCta
-              ubicacion="header_movil"
-              className="btn-whatsapp mt-2"
-            >
+            <WhatsAppCta ubicacion="header_movil" className="btn-whatsapp mt-2">
               <WhatsAppIcon className="h-4 w-4" />
               Escribir por WhatsApp · {SITE.phoneDisplay}
             </WhatsAppCta>
