@@ -29,7 +29,7 @@ export function FeaturedSection({ properties }: { properties: Property[] }) {
         <div className={`mt-10 grid gap-6 sm:grid-cols-2 ${properties.length === 4 ? "" : "lg:grid-cols-3"}`}>
           {properties.map((p, i) => (
             <Reveal key={p.id} delay={(i % 3) * 100} className="h-full">
-              <PropertyCard property={p} index={i} />
+              <PropertyCard property={p} index={i} imageSizes={properties.length === 4 ? "(max-width: 639px) calc(100vw - 40px), (max-width: 1199px) calc(50vw - 36px), 556px" : undefined} />
             </Reveal>
           ))}
         </div>
