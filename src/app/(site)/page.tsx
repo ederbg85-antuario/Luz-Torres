@@ -4,10 +4,10 @@ import { HomeJourney } from "@/components/site/HomeJourney";
 import { CtaSection } from "@/components/site/CtaSection";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getFeaturedProperties, getPropertyBySlug, getSeoIndex } from "@/lib/data";
+import { getFeaturedProperties, getSeoIndex } from "@/lib/data";
 import { SITE } from "@/lib/constants";
 import { SITE_URL } from "@/lib/supabase/config";
-import { allCategoryPaths } from "@/lib/seo";
+import { buyerAreaLinks } from "@/lib/buyer-focus";
 import { serializeJsonLd } from "@/lib/json-ld";
 
 export const revalidate = 300;
@@ -44,20 +44,12 @@ const jsonLd = {
 };
 
 export default async function HomePage() {
-  const [featured, alpes, index] = await Promise.all([
+  const [featured, index] = await Promise.all([
     getFeaturedProperties(6),
-    getPropertyBySlug("departamento-venta-los-alpes-alvaro-obregon-iap7712491"),
     getSeoIndex(),
   ]);
-  const categoryPaths = new Set(allCategoryPaths(index));
-  const localLinks = [
-    { path: "/propiedades/venta/departamentos/alvaro-obregon", label: "Departamentos en venta en Álvaro Obregón" },
-    { path: "/propiedades/venta/casas/chicoloapan", label: "Casas en venta en Chicoloapan" },
-  ].filter((link) => categoryPaths.has(link.path));
-  const selection = [
-    ...(alpes ? [alpes] : []),
-    ...featured.filter((p) => p.id !== alpes?.id),
-  ].slice(0, 6);
+  const localLinks = buyerAreaLinks(index);
+  const selection = featured;
 
   return (
     <>

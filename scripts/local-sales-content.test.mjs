@@ -126,3 +126,48 @@ test("category metadata uses singular labels and rental intent without adding ab
   assert.equal(house.openGraph.description, house.description);
   assert.equal(house.alternates.canonical, "/propiedades/venta/casas/huasca-de-ocampo");
 });
+
+const { buyerFocus, buyerAreaLinks } = loadTs("src/lib/buyer-focus.ts");
+const delVallePair = () => [
+  property({ slug: "departamento-venta-del-valle-sur-benito-juarez-iap8022745", municipio: "Benito Juárez", colonia: "Del Valle Sur", price: 7_600_000, currency: "MXN" }),
+  property({ slug: "departamento-venta-del-valle-sur-benito-juarez-iap7975541", municipio: "Benito Juárez", colonia: "Del Valle Sur", price: 12_850_000, currency: "MXN" }),
+];
+const delValleCategory = () => descriptor({ type: "departamento", level: "municipio", municipio: "Benito Juárez", path: "/propiedades/venta/departamentos/benito-juarez" });
+
+test("buyer pages use live prices and keep the existing municipal canonical", () => {
+  const pair = delVallePair();
+  const result = buyerFocus(delValleCategory(), pair);
+  assert.match(result.heading, /Del Valle Sur, Benito Juárez/);
+  assert.match(result.intro, /7,600,000.*12,850,000/);
+  pair[0].price = 7_500_000;
+  assert.match(buyerFocus(delValleCategory(), pair).intro, /7,500,000/);
+  const { categoryMetadata } = loadTs("src/lib/seo.ts");
+  const meta = categoryMetadata({ ...delValleCategory(), heading: result.heading, searchTitle: result.title, searchDescription: result.description }, 2, 7_500_000);
+  assert.match(meta.title.absolute, /Del Valle Sur/);
+  assert.equal(meta.description, result.description);
+  assert.equal(meta.openGraph.description, meta.description);
+  assert.equal(meta.alternates.canonical, delValleCategory().path);
+});
+
+test("a withdrawn, replaced or expanded pair cannot retain unit-specific buyer claims", () => {
+  const pair = delVallePair();
+  assert.equal(buyerFocus(delValleCategory(), []), null);
+  assert.equal(buyerFocus(delValleCategory(), pair.slice(0, 1)), null);
+  assert.equal(buyerFocus(delValleCategory(), [pair[0], { ...pair[1], slug: "replacement" }]), null);
+  assert.equal(buyerFocus(delValleCategory(), [...pair, property({ colonia: "Narvarte" })]), null);
+  assert.equal(buyerFocus({ ...delValleCategory(), operation: "renta" }, pair), null);
+  assert.equal(buyerFocus({ ...delValleCategory(), level: "estado" }, pair), null);
+});
+
+test("home sale links survive withdrawn pilots and only point to real current areas", () => {
+  const rows = [...delVallePair(), property({ municipio: "Pachuca de Soto", estado: "Hidalgo" })].map((p) => ({ ...p, operation: "venta" }));
+  const links = buyerAreaLinks(rows);
+  assert.equal(links.length, 2);
+  assert.match(links[0].path, /benito-juarez$/);
+  assert.match(links[1].path, /pachuca-de-soto$/);
+  assert.doesNotMatch(JSON.stringify(links), /alvaro-obregon|chicoloapan/);
+  const later = buyerAreaLinks([{ ...rows[0], municipio: "Cuernavaca" }]);
+  assert.equal(later.length, 1);
+  assert.match(later[0].path, /cuernavaca$/);
+  assert.equal(buyerAreaLinks([{ ...rows[0], operation: "renta" }]).length, 0);
+});
